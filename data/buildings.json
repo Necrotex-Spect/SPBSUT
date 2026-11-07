@@ -1,0 +1,9 @@
+{
+  "mine":     {"name": "Шахта",          "cost": {"metal": 20},               "in": {},                      "out": {},           "icon": "⛏", "extractor": true},
+  "factory":  {"name": "Завод",          "cost": {"metal": 30, "coal": 10},   "in": {"coal": 5, "metal": 3}, "out": {"goods": 5}, "icon": "🏭"},
+  "farm":     {"name": "Совхоз",         "cost": {"metal": 15},               "in": {},                      "out": {"grain": 6}, "icon": "🌾"},
+  "nii":      {"name": "НИИ",            "cost": {"metal": 25, "science": 10}, "in": {},                      "out": {"science": 2},"icon": "🔬"},
+  "oil":      {"name": "Нефтевышка",     "cost": {"metal": 20},               "in": {},                      "out": {"oil": 3},   "icon": "🛢"},
+  "port":     {"name": "Порт",           "cost": {"metal": 25},               "in": {},                      "out": {"goods": 2}, "icon": "⚓"},
+  "forest":   {"name": "Лесозаготовка",  "cost": {"metal": 15},               "in": {},                      "out": {"wood": 4},  "icon": "🌲"}
+}

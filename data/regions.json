@@ -1,0 +1,12 @@
+[
+  {"id": "center",        "name": "Москва",          "spec": "Наука, управление", "slots": 4, "buildings": ["nii_1", "admin"],  "pos": [-3.5, 0, -2],   "resources": ["science"]},
+  {"id": "leningrad",     "name": "Ленинград",       "spec": "Машиностроение",    "slots": 3, "buildings": ["factory_1"],       "pos": [-4.5, 0, -2.5], "resources": ["metal"]},
+  {"id": "donbass",       "name": "Донбасс",         "spec": "Уголь",             "slots": 3, "buildings": ["mine_1"],          "pos": [-3.5, 0, 0],    "resources": ["coal"]},
+  {"id": "volga",         "name": "Поволжье",        "spec": "Сельхоз, нефть",    "slots": 3, "buildings": ["farm_1", "oil_1"], "pos": [-1.5, 0, -1.5], "resources": ["grain", "oil"]},
+  {"id": "ural",          "name": "Урал",            "spec": "Металлургия",       "slots": 3, "buildings": ["mine_1", "factory_1"], "pos": [0, 0, -1.5], "resources": ["metal", "coal"]},
+  {"id": "caucasus",      "name": "Закавказье",      "spec": "Нефть",             "slots": 2, "buildings": ["oil_1"],           "pos": [-2.5, 0, 1.5],  "resources": ["oil"]},
+  {"id": "central_asia",  "name": "Средняя Азия",    "spec": "Хлопок, газ",       "slots": 2, "buildings": ["farm_1"],          "pos": [-0.5, 0, 1.5],  "resources": ["grain"]},
+  {"id": "west_siberia",  "name": "Западная Сибирь", "spec": "Нефть, газ",        "slots": 3, "buildings": ["oil_1"],           "pos": [2, 0, -1],      "resources": ["oil", "metal"]},
+  {"id": "east_siberia",  "name": "Восточная Сибирь","spec": "Уголь, лес",        "slots": 3, "buildings": ["mine_1"],          "pos": [3.5, 0, -0.5],  "resources": ["coal", "wood"]},
+  {"id": "far_east",      "name": "Дальний Восток",  "spec": "Рыба, руды",        "slots": 2, "buildings": ["mine_1"],          "pos": [5, 0, 0],       "resources": ["metal", "wood"]}
+]

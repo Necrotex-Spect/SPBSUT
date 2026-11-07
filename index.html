@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0f18">
+<title>Акт I — Раздел мира · Балтийский форум</title>
+<link rel="stylesheet" href="css/game.css">
+<style>
+  #task-panel { font-size: 13px; }
+  .task-card {
+    background: rgba(255,255,255,0.05);
+    border-left: 3px solid #ffd27a;
+    padding: 10px; margin-bottom: 10px; border-radius: 4px;
+    transition: background 0.2s;
+  }
+  .task-card:hover { background: rgba(255,255,255,0.08); }
+  .task-card.critical { border-left-color: #ff6b6b; }
+  .task-card.high { border-left-color: #ffd93d; }
+  .task-card.medium { border-left-color: #6bcb77; }
+  .task-card.completed { border-left-color: #6bcb77; opacity: 0.7; }
+  .task-card.failed { border-left-color: #ff6b6b; opacity: 0.7; }
+  .task-progress-bar {
+    background: rgba(0,0,0,0.3); height: 6px;
+    border-radius: 3px; overflow: hidden; margin-top: 6px;
+  }
+  .task-progress-fill {
+    height: 100%; background: #ffd27a;
+    transition: width 0.3s ease;
+  }
+  .task-progress-fill.done { background: #6bcb77; }
+  .task-progress-fill.danger { background: #ff6b6b; }
+  .task-meta {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 6px;
+  }
+  .task-title { font-weight: 600; font-size: 13px; flex: 1; }
+  .task-timer {
+    font-size: 11px; padding: 2px 6px;
+    border-radius: 3px; background: rgba(0,0,0,0.3);
+  }
+  .task-timer.urgent { color: #ff6b6b; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+  .task-desc { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+  .task-stats { font-size: 11px; opacity: 0.8; margin-top: 4px; }
+  .section-label {
+    font-weight: 600; margin-bottom: 10px;
+    color: #ffd27a; font-size: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-label.completed { color: #6bcb77; }
+  .empty-state { padding: 10px; opacity: 0.6; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="game">
+  <canvas id="canvas"></canvas>
+
+  <!-- ============ ОНБОРДИНГ (без active — показывается из JS) ============ -->
+  <div id="onboarding" class="screen">
+    <div class="ob-container">
+      <div class="ob-header">
+        <div>
+          <div class="ob-logo">АКТ I · РАЗДЕЛ МИРА</div>
+          <div class="ob-logo-sub">БАЛТИЙСКИЙ ФОРУМ · 2025</div>
+        </div>
+        <button class="ob-skip" id="ob-skip">Пропустить →</button>
+      </div>
+
+      <div class="ob-body" id="ob-body">
+        <div class="ob-slide active" data-slide="0">
+          <div class="ob-slide-title">Добро пожаловать</div>
+          <div class="ob-slide-subtitle">Интерактивная историческая стратегия</div>
+          <div class="ob-content">
+            <p>Перед вами — <strong>«Акт I: Раздел мира»</strong>, образовательный проект, созданный для <strong>Балтийского форума 2025</strong>.</p>
+            <p>Это не просто игра. Это <strong>интерактивный исторический документ</strong>, который позволяет прикоснуться к одному из самых сложных и переломных периодов XX века — первым послевоенным годам (1946–1949), когда мир заново делился на сферы влияния, а вчерашние союзники становились противниками.</p>
+            <p>Вы — руководитель государства, которому предстоит восстанавливать страну из руин, принимать решения о судьбе миллионов людей и выбирать свой путь между восстановлением и конфронтацией.</p>
+          </div>
+        </div>
+
+        <div class="ob-slide" data-slide="1">
+          <div class="ob-slide-title">О проекте</div>
+          <div class="ob-slide-subtitle">Зачем существует игра</div>
+          <div class="ob-content">
+            <p>После окончания Второй мировой войны Европа лежала в руинах, а мир вступал в новую эпоху — <strong>Холодную войну</strong>. В этих условиях формировались доктрины, союзы и конфликты, определившие XX век.</p>
+            <p><strong>Цель проекта:</strong> сделать историю осязаемой. Показать, что за каждым решением — будь то Доктрина Трумэна или Берлинский кризис — стояли конкретные люди, ресурсы, ограничения и альтернативы.</p>
+            <p><strong>Проект создан для:</strong></p>
+            <ul>
+              <li>Студентов и школьников, изучающих историю XX века</li>
+              <li>Учителей и преподавателей — как интерактивное пособие</li>
+              <li>Всех, кому интересно, как принимаются исторические решения</li>
+            </ul>
+            <p>В основе игры — <strong>реальные исторические события</strong>, документы и решения. Все ключевые развилки имеют историческую основу, а альтернативные варианты дают возможность увидеть, «что было бы, если...».</p>
+          </div>
+        </div>
+
+        <div class="ob-slide" data-slide="2">
+          <div class="ob-slide-title">Как устроен мир</div>
+          <div class="ob-slide-subtitle">Регионы, ресурсы, решения</div>
+          <div class="ob-content">
+            <p>Страна разделена на <strong>10 регионов</strong>, каждый со своей специализацией и ресурсами. Ваша задача — восстановить экономику, обеспечить людей и подготовиться к новым вызовам.</p>
+          </div>
+          <div class="ob-grid">
+            <div class="ob-card">
+              <div class="ob-card-icon">🗺</div>
+              <div class="ob-card-title">Регионы</div>
+              <div class="ob-card-text">Москва, Урал, Донбасс, Поволжье и другие. В каждом — свои ресурсы и специализация. Урал — металлургия, Донбасс — уголь, Поволжье — нефть.</div>
+            </div>
+            <div class="ob-card">
+              <div class="ob-card-icon">⛏</div>
+              <div class="ob-card-title">Ресурсы</div>
+              <div class="ob-card-text">Уголь, металл, зерно, нефть, наука, лес, товары. Стройте шахты, заводы, совхозы. Следите за балансом — голод или дефицит ресурсов пагубно влияет на доверие.</div>
+            </div>
+            <div class="ob-card">
+              <div class="ob-card-icon">📋</div>
+              <div class="ob-card-title">Задачи</div>
+              <div class="ob-card-text">Восстановление Донбасса, ДнепроГЭС, снабжение городов. У каждой задачи есть срок, награда и последствия провала.</div>
+            </div>
+            <div class="ob-card">
+              <div class="ob-card-icon">🏛</div>
+              <div class="ob-card-title">События</div>
+              <div class="ob-card-text">Доктрина Трумэна, Берлинский кризис, атомный проект. Реальные развилки с историческими и альтернативными вариантами.</div>
+            </div>
+            <div class="ob-card">
+              <div class="ob-card-icon">❤</div>
+              <div class="ob-card-title">Доверие</div>
+              <div class="ob-card-text">Ключевая шкала: если народ не доверяет власти, страна рушится. Заботьтесь о людях, иначе получите восстания.</div>
+            </div>
+            <div class="ob-card">
+              <div class="ob-card-icon">⏱</div>
+              <div class="ob-card-title">Время</div>
+              <div class="ob-card-text">Игра идёт в реальном времени. Ускоряйте, замедляйте, ставьте на паузу. 48 игровых месяцев — путь от разрухи до нового мира.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-slide" data-slide="3">
+          <div class="ob-slide-title">Управление</div>
+          <div class="ob-slide-subtitle">Как играть</div>
+          <div class="ob-content">
+            <p>Основные действия — на карте и через нижнюю панель. Вот шпаргалка по управлению:</p>
+          </div>
+          <div class="ob-controls-grid">
+            <div class="ob-control"><div class="ob-key">ЛКМ</div><div class="ob-key-text">Выбор региона на карте</div></div>
+            <div class="ob-control"><div class="ob-key">Drag</div><div class="ob-key-text">Панорама карты</div></div>
+            <div class="ob-control"><div class="ob-key">Колесо</div><div class="ob-key-text">Зум камеры</div></div>
+            <div class="ob-control"><div class="ob-key">Space</div><div class="ob-key-text">Пауза / возобновление</div></div>
+            <div class="ob-control"><div class="ob-key">1</div><div class="ob-key-text">Скорость x1</div></div>
+            <div class="ob-control"><div class="ob-key">2</div><div class="ob-key-text">Скорость x2</div></div>
+            <div class="ob-control"><div class="ob-key">3</div><div class="ob-key-text">Скорость x3</div></div>
+            <div class="ob-control"><div class="ob-key">Esc</div><div class="ob-key-text">Меню паузы / настройки</div></div>
+          </div>
+          <div class="ob-content" style="margin-top: 20px;">
+            <p><strong>Стратегия:</strong> не гонитесь за всем сразу. Сначала восстановите базовые ресурсы — уголь и металл. Затем займитесь зерном, чтобы не упало доверие. Следите за задачами: провал критических задач может стоить вам всей игры.</p>
+            <p><strong>Помните:</strong> это историческая игра. Здесь нет «правильного» ответа — есть только последствия ваших решений.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-footer">
+        <div class="ob-progress">
+          <div class="ob-dot active"></div>
+          <div class="ob-dot"></div>
+          <div class="ob-dot"></div>
+          <div class="ob-dot"></div>
+        </div>
+        <div class="ob-nav">
+          <button id="ob-prev">← Назад</button>
+          <button id="ob-next" class="primary">Далее →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ГЛАВНОЕ МЕНЮ ============ -->
+  <div id="main-menu" class="screen">
+    <div class="main-menu-inner">
+      <div class="game-logo">АКТ I</div>
+      <div class="game-subtitle">РАЗДЕЛ МИРА · 1946</div>
+
+      <button id="btn-new-game" class="menu-btn primary">
+        <span class="icon">🎬</span>
+        <span class="text">Новая игра<span class="hint">Начать восстановление страны</span></span>
+      </button>
+      <button id="btn-load-game" class="menu-btn">
+        <span class="icon">💾</span>
+        <span class="text">Загрузить<span class="hint">Продолжить с сохранения</span></span>
+      </button>
+      <button id="btn-settings-menu" class="menu-btn">
+        <span class="icon">⚙</span>
+        <span class="text">Настройки<span class="hint">Скорость, звук, подсказки</span></span>
+      </button>
+      <button id="btn-view-onboarding" class="menu-btn">
+        <span class="icon">📖</span>
+        <span class="text">Справка о проекте<span class="hint">О проекте и устройстве игры</span></span>
+      </button>
+      <button id="btn-about" class="menu-btn">
+        <span class="icon">ℹ</span>
+        <span class="text">Об игре<span class="hint">Историческая справка и управление</span></span>
+      </button>
+
+      <div class="menu-footer">
+        MVP v0.5 · Акт I — Раздел мира · 1946–1949<br>
+        Балтийский форум · 2025
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ЗАГРУЗКА ============ -->
+  <div id="loading-screen" class="screen">
+    <div class="loading-fact" id="loading-fact">Загрузка...</div>
+    <div class="loading-bar-wrap">
+      <div class="loading-bar-fill" id="loading-bar-fill"></div>
+    </div>
+    <div class="loading-status" id="loading-status">Подготовка...</div>
+  </div>
+
+  <!-- ============ НАСТРОЙКИ ============ -->
+  <div id="settings-screen" class="screen">
+    <div class="settings-inner">
+      <h2>⚙ Настройки</h2>
+
+      <div class="setting-row">
+        <label>Скорость по умолчанию<span class="desc">С какой скоростью начнётся игра</span></label>
+        <select id="set-default-speed" style="background:#2a3545; color:#e8e8e8; border:1px solid #3a4a5a; padding:8px; border-radius:4px;">
+          <option value="1">x1</option>
+          <option value="2">x2</option>
+          <option value="3">x3</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <label>Громкость<span class="desc">Общий уровень звука</span></label>
+        <input type="range" id="set-volume" min="0" max="100" value="70">
+        <span id="set-volume-label" style="margin-left:8px; min-width:44px; text-align:right;">70%</span>
+      </div>
+
+      <div class="setting-row">
+        <label>Подсказки<span class="desc">Показывать всплывающие подсказки</span></label>
+        <input type="checkbox" id="set-tooltips" checked>
+      </div>
+
+      <div class="settings-actions">
+        <button id="btn-settings-back">← Назад</button>
+        <button id="btn-settings-apply" class="primary">Применить</button>
+      </div>
+
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <button id="btn-reset-progress" style="width:100%; background:#5a2a2a; border-color:#7a3a3a;">
+          🗑 Сбросить весь прогресс и справку
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ОБ ИГРЕ ============ -->
+  <div id="about-screen" class="screen">
+    <div class="settings-inner">
+      <h2>ℹ Об игре</h2>
+      <div class="about-text">
+        <strong>Акт I — Раздел мира</strong> — образовательная стратегия в реальном времени о восстановлении СССР после Великой Отечественной войны (1946–1949).
+      </div>
+      <div class="about-text">
+        Проект создан для <strong>Балтийского форума 2025</strong>. Игра — интерактивное историческое пособие, позволяющее увидеть, как принимались судьбоносные решения первых послевоенных лет.
+      </div>
+      <div class="about-text">
+        <strong>Управление:</strong><br>
+        • <strong>Пробел</strong> — пауза<br>
+        • <strong>1 / 2 / 3</strong> — скорость времени<br>
+        • <strong>Esc</strong> — меню паузы<br>
+        • <strong>ЛКМ + перетаскивание</strong> — панорама карты<br>
+        • <strong>Колесо мыши</strong> — зум<br>
+        • <strong>Клик по региону</strong> — выбор и строительство
+      </div>
+      <div class="about-text" style="opacity:0.6; font-size:12px;">
+        Все исторические события, решения и последствия основаны на реальных данных. Игра создана в образовательных целях.
+      </div>
+      <div class="settings-actions">
+        <button id="btn-about-back" style="flex:1;">← Назад</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ПАУЗА ============ -->
+  <div id="pause-menu" class="screen">
+    <div class="pause-inner">
+      <h2>⏸ Пауза</h2>
+      <button id="btn-pause-resume" class="menu-btn primary">
+        <span class="icon">▶</span>
+        <span class="text">Продолжить<span class="hint">Вернуться в игру</span></span>
+      </button>
+      <button id="btn-pause-settings" class="menu-btn">
+        <span class="icon">⚙</span>
+        <span class="text">Настройки<span class="hint">Изменить параметры</span></span>
+      </button>
+      <button id="btn-pause-main-menu" class="menu-btn">
+        <span class="icon">🏠</span>
+        <span class="text">В главное меню<span class="hint">Прогресс не сохранится</span></span>
+      </button>
+      <button id="btn-pause-exit" class="menu-btn" style="background:rgba(80,30,30,0.8);">
+        <span class="icon">🚪</span>
+        <span class="text">Выйти<span class="hint">Закрыть игру</span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ UI ИГРЫ ============ -->
+  <div id="ui">
+    <div id="top" class="panel">
+      <div class="res">⛏ Уголь: <span class="val" id="r-coal">50</span><span class="delta" id="d-coal"></span></div>
+      <div class="res">🔩 Металл: <span class="val" id="r-metal">40</span><span class="delta" id="d-metal"></span></div>
+      <div class="res">🌾 Зерно: <span class="val" id="r-grain">60</span><span class="delta" id="d-grain"></span></div>
+      <div class="res">🛢 Нефть: <span class="val" id="r-oil">20</span><span class="delta" id="d-oil"></span></div>
+      <div class="res">🔬 Наука: <span class="val" id="r-science">0</span><span class="delta" id="d-science"></span></div>
+      <div class="res">🌲 Лес: <span class="val" id="r-wood">0</span><span class="delta" id="d-wood"></span></div>
+      <div class="res">📦 Товары: <span class="val" id="r-goods">0</span><span class="delta" id="d-goods"></span></div>
+      <div class="res">❤ Доверие: <span class="val" id="r-trust">60</span></div>
+      <div class="res">📈 План: <span class="val" id="r-eff">50</span></div>
+
+      <div id="time-block" style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+        <div id="game-date" style="font-weight:600; color:#ffd27a; font-size:14px; min-width:160px; text-align:right;">
+          1 Январь 1946
+        </div>
+        <div style="width:100px; height:6px; background:rgba(0,0,0,0.4); border-radius:3px; overflow:hidden;">
+          <div id="time-progress-fill" style="height:100%; background:#ffd27a; width:0%; transition: width 0.1s linear;"></div>
+        </div>
+        <span id="speed-label" style="font-size:12px; min-width:70px; text-align:center;">▶ x1</span>
+      </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="side">
+      <div id="task-panel" class="panel">
+        <div class="empty-state">Загрузка задач...</div>
+      </div>
+
+      <div id="region-panel" class="panel">
+        <h3 id="rp-name">Выберите регион</h3>
+        <div id="rp-info" style="font-size:13px; opacity:0.7; margin: 8px 0;">Кликните на регион на карте</div>
+        <div id="rp-buildings"></div>
+        <div id="rp-actions" style="margin-top: 8px;"></div>
+      </div>
+
+      <div id="feed" class="panel">
+        <div style="font-weight:600; margin-bottom: 8px;">📜 Лента событий</div>
+        <div id="feed-list"></div>
+      </div>
+    </div>
+
+    <div id="bottom" class="panel">
+      <button id="btn-pause" title="Пауза (пробел)">⏸</button>
+      <button id="btn-speed-1" title="x1 (1)">▶</button>
+      <button id="btn-speed-2" title="x2 (2)">▶▶</button>
+      <button id="btn-speed-3" title="x3 (3)">▶▶▶</button>
+      <div style="width:1px; height:24px; background:#3a4a5a; margin:0 4px;"></div>
+      <button id="btn-dossier">📖 Досье</button>
+      <button id="btn-tasks">📋 Задачи</button>
+      <div style="flex:1"></div>
+      <div id="status" style="font-size:12px; opacity:0.7;"></div>
+    </div>
+  </div>
+
+  <!-- ============ МОДАЛКА ЗАДАЧИ (ПРИНЯТИЕ) ============ -->
+  <div id="task-modal" style="
+    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 150; padding: 16px;
+    backdrop-filter: blur(0px);
+    transition: backdrop-filter 0.3s, background 0.3s;
+  ">
+    <div id="task-modal-card" class="meeting-card" style="max-width: 640px;"></div>
+  </div>
+
+  <!-- ============ МОДАЛКА РЕЗУЛЬТАТА ЗАДАЧИ ============ -->
+  <div id="task-result-modal" style="
+    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 155; padding: 16px;
+    backdrop-filter: blur(0px);
+    transition: backdrop-filter 0.3s, background 0.3s;
+  ">
+    <div id="task-result-card" class="meeting-card" style="max-width: 640px;"></div>
+  </div>
+
+  <!-- ============ МОДАЛКА СОБЫТИЙ ============ -->
+  <div id="meeting-modal">
+    <div class="meeting-card" id="meeting-card"></div>
+  </div>
+
+  <!-- ============ ДОСЬЕ ============ -->
+  <div id="dossier-modal" style="
+    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px;
+  ">
+    <div class="meeting-card" id="dossier-card" style="max-width: 700px;">
+      <h2>📖 Досье</h2>
+      <div id="dossier-list"></div>
+      <button id="btn-close-dossier" style="margin-top: 16px; width: 100%;">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- ============ ВСЕ ЗАДАЧИ ============ -->
+  <div id="tasks-modal" style="
+    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px;
+  ">
+    <div class="meeting-card" id="tasks-card" style="max-width: 700px;">
+      <h2>📋 Все задачи</h2>
+      <div id="tasks-list"></div>
+      <button id="btn-close-tasks" style="margin-top: 16px; width: 100%;">Закрыть</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="rotate-hint">
+    <div class="icon">📱↻</div>
+    <div>Поверните устройство горизонтально</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

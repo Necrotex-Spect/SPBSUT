@@ -1,0 +1,436 @@
+import { state } from './state.js';
+
+let lastResources = {};
+
+export function render() {
+  ['coal', 'metal', 'grain', 'oil', 'science', 'wood', 'goods'].forEach(k => {
+    const valEl = document.getElementById('r-' + k);
+    const deltaEl = document.getElementById('d-' + k);
+    if (!valEl) return;
+
+    const newVal = Math.floor(state.resources[k] || 0);
+
+    if (lastResources[k] !== undefined && lastResources[k] !== newVal) {
+      const resEl = valEl.closest('.res');
+      if (resEl) {
+        resEl.classList.remove('flash');
+        void resEl.offsetWidth;
+        resEl.classList.add('flash');
+      }
+    }
+    lastResources[k] = newVal;
+
+    valEl.textContent = newVal;
+
+    if (deltaEl) {
+      const d = state.deltas[k] || 0;
+      if (d > 0) {
+        deltaEl.textContent = `+${d}`;
+        deltaEl.className = 'delta pos';
+      } else if (d < 0) {
+        deltaEl.textContent = `${d}`;
+        deltaEl.className = 'delta neg';
+      } else {
+        deltaEl.textContent = '';
+        deltaEl.className = 'delta';
+      }
+    }
+  });
+
+  const trustEl = document.getElementById('r-trust');
+  const effEl = document.getElementById('r-eff');
+  if (trustEl) trustEl.textContent = Math.floor(state.scales.trust);
+  if (effEl) effEl.textContent = Math.floor(state.scales.efficiency);
+
+  renderFeed();
+  renderTasks();
+}
+
+let lastFeedCount = 0;
+
+function renderFeed() {
+  const list = document.getElementById('feed-list');
+  if (!list) return;
+
+  if (state.feed.length === lastFeedCount && list.children.length === state.feed.length) return;
+  lastFeedCount = state.feed.length;
+
+  list.innerHTML = state.feed.map((f, i) =>
+    `<div class="feed-item ${f.isMeeting ? 'meeting' : ''}" style="animation-delay:${Math.min(i * 0.03, 0.3)}s">М${f.tick}: ${f.text}</div>`
+  ).join('');
+}
+
+export function selectRegion(id) {
+  state.selectedRegion = id;
+  const r = state.regions.find(x => x.id === id);
+  if (!r) return;
+
+  const side = document.getElementById('side');
+  if (side && window.innerWidth < 900) {
+    side.classList.add('expanded');
+    setTimeout(() => {
+      const regionPanel = document.getElementById('region-panel');
+      if (regionPanel) {
+        regionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 350);
+  }
+
+  const nameEl = document.getElementById('rp-name');
+  const infoEl = document.getElementById('rp-info');
+  const bldEl = document.getElementById('rp-buildings');
+  const actEl = document.getElementById('rp-actions');
+  const panel = document.getElementById('region-panel');
+
+  if (panel) {
+    panel.style.animation = 'none';
+    void panel.offsetWidth;
+    panel.style.animation = 'fadeInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both';
+  }
+
+  if (nameEl) nameEl.textContent = r.name;
+  if (infoEl) infoEl.textContent = `Специализация: ${r.spec} · Слотов: ${r.slots} · Занято: ${r.buildings.length}`;
+
+  if (bldEl) {
+    bldEl.innerHTML = '<div style="font-size:12px; opacity:0.7; margin-bottom:4px;">Постройки:</div>';
+    r.buildings.forEach((bId, i) => {
+      const bType = bId.split('_')[0];
+      const b = state.buildings[bType];
+      if (!b) return;
+      const div = document.createElement('div');
+      div.style.cssText = `font-size:13px; padding:2px 0; animation: fadeInUp 0.3s ease ${i * 0.05}s both;`;
+      div.textContent = `${b.icon} ${b.name}`;
+      bldEl.appendChild(div);
+    });
+  }
+
+  if (actEl) {
+    actEl.innerHTML = '';
+    Object.keys(state.buildings).forEach(bId => {
+      const b = state.buildings[bId];
+      const btn = document.createElement('button');
+      btn.textContent = `+ ${b.icon} ${b.name}`;
+      btn.style.cssText = 'margin: 2px; font-size: 12px; padding: 6px 10px; min-height: 32px;';
+      btn.onclick = () => {
+        import('./economy.js').then(({ build }) => {
+          const result = build(r.id, bId);
+          if (result && result.error) {
+            flashStatus(result.error);
+            btn.style.animation = 'shake 0.4s';
+            setTimeout(() => { btn.style.animation = ''; }, 400);
+          } else {
+            selectRegion(id);
+            render();
+          }
+        });
+      };
+      actEl.appendChild(btn);
+    });
+  }
+
+  import('./scene.js').then(({ highlightRegion }) => highlightRegion(id)).catch(() => {});
+}
+
+export function addFeed(text, isMeeting = false) {
+  state.feed.unshift({ tick: state.tick, text, isMeeting });
+  if (state.feed.length > 30) state.feed.pop();
+}
+
+export function flashStatus(text) {
+  const s = document.getElementById('status');
+  if (!s) return;
+  s.textContent = text;
+  s.style.color = '#ff7a7a';
+  s.style.animation = 'none';
+  void s.offsetWidth;
+  s.style.animation = 'shake 0.3s';
+  setTimeout(() => {
+    if (s.textContent === text) {
+      s.textContent = '';
+      s.style.color = '';
+    }
+  }, 2500);
+}
+
+let lastTasksHash = '';
+
+export function renderTasks() {
+  const taskPanel = document.getElementById('task-panel');
+  if (!taskPanel) return;
+
+  import('./tasks.js').then(({ activeTasks, completedTasks }) => {
+    const hash = activeTasks.map(t => `${t.id}:${t.progress}:${t.timeLeft}`).join('|') +
+                 '#' + completedTasks.length;
+    if (hash === lastTasksHash) return;
+    lastTasksHash = hash;
+
+    if (activeTasks.length === 0 && completedTasks.length === 0) {
+      taskPanel.innerHTML = '<div class="empty-state">Нет активных задач</div>';
+      return;
+    }
+
+    let html = '';
+
+    if (activeTasks.length > 0) {
+      html += '<div class="section-label">📋 Активные задачи</div>';
+      activeTasks.forEach((task, i) => {
+        const priorityClass = task.priority === 'critical' ? 'critical' :
+                              task.priority === 'high' ? 'high' : 'medium';
+        const isUrgent = task.timeLeft <= 3;
+        const isDone = task.progress >= 100;
+        const fillClass = isDone ? 'done' : (isUrgent ? 'danger' : '');
+
+        html += `
+          <div class="task-card ${priorityClass}" style="animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.08}s both;">
+            <div class="task-meta">
+              <div class="task-title">${task.title}</div>
+              <div class="task-timer ${isUrgent ? 'urgent' : ''}">⏱ ${task.timeLeft} мес.</div>
+            </div>
+            <div class="task-desc">${task.description.split('\n')[0]}</div>
+            <div class="task-progress-bar">
+              <div class="task-progress-fill ${fillClass}" style="width: ${task.progress}%"></div>
+            </div>
+            <div class="task-stats">
+              Прогресс: ${task.progress}% ·
+              ${getResourceName(task.target.resource)}: ${state.resources[task.target.resource] || 0}/${task.target.value}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    if (completedTasks.length > 0) {
+      html += '<div class="section-label completed">✓ Завершённые</div>';
+      completedTasks.slice(-3).forEach(task => {
+        const cls = task.status === 'completed' ? 'completed' : 'failed';
+        const icon = task.status === 'completed' ? '✅' : '❌';
+        html += `
+          <div class="task-card ${cls}" style="animation: cardIn 0.3s ease both;">
+            <div class="task-title">${icon} ${task.title}</div>
+            <div class="task-desc" style="opacity:0.6;">${task.status === 'completed' ? 'Выполнена' : 'Провалена'}</div>
+          </div>
+        `;
+      });
+    }
+
+    taskPanel.innerHTML = html;
+  });
+}
+
+export function renderDossier() {
+  const modal = document.getElementById('dossier-modal');
+  const list = document.getElementById('dossier-list');
+  if (!modal || !list) return;
+
+  if (!state.dossier || state.dossier.length === 0) {
+    list.innerHTML = '<div class="empty-state">Досье пока пусто. Принимайте решения — они сохранятся здесь.</div>';
+  } else {
+    list.innerHTML = state.dossier.slice().reverse().map((d, i) => `
+      <div style="
+        background: rgba(255,210,122,0.08);
+        border-left: 3px solid #ffd27a;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 4px;
+        animation: fadeInUp 0.4s ease ${i * 0.05}s both;
+      ">
+        <div style="font-weight:600; color:#ffd27a; margin-bottom:4px;">
+          ${d.type === 'task' ? '📋' : d.type === 'meeting' ? '🏛' : '⚡'} ${d.title}
+        </div>
+        <div style="font-size:11px; opacity:0.6; margin-bottom:8px;">${d.date || ''}</div>
+        ${d.historicalContext ? `<div style="font-size:12px; margin-bottom:8px; line-height:1.5; white-space:pre-line;"><strong>Контекст:</strong><br>${d.historicalContext}</div>` : ''}
+        ${d.choice ? `<div style="font-size:12px; margin-bottom:6px;"><strong>Решение:</strong> ${d.choice}</div>` : ''}
+        ${d.outcome ? `<div style="font-size:12px; margin-bottom:6px;"><strong>Итог:</strong> ${d.outcome}</div>` : ''}
+        <div style="font-size:12px; line-height:1.5; white-space:pre-line;">${d.text}</div>
+      </div>
+    `).join('');
+  }
+
+  modal.style.display = 'flex';
+  modal.style.animation = 'modalBgIn 0.3s ease forwards';
+}
+
+export function renderAllTasks() {
+  const modal = document.getElementById('tasks-modal');
+  const list = document.getElementById('tasks-list');
+  if (!modal || !list) return;
+
+  import('./tasks.js').then(({ activeTasks, completedTasks }) => {
+    if (activeTasks.length === 0 && completedTasks.length === 0) {
+      list.innerHTML = '<div class="empty-state">Задач пока нет</div>';
+    } else {
+      let html = '';
+
+      if (activeTasks.length > 0) {
+        html += '<div class="section-label">📋 Активные задачи</div>';
+        activeTasks.forEach(task => {
+          html += renderTaskDetail(task);
+        });
+      }
+
+      if (completedTasks.length > 0) {
+        html += '<div class="section-label completed">✓ Завершённые</div>';
+        completedTasks.slice().reverse().forEach(task => {
+          html += renderTaskDetail(task, true);
+        });
+      }
+
+      list.innerHTML = html;
+    }
+
+    modal.style.display = 'flex';
+    modal.style.animation = 'modalBgIn 0.3s ease forwards';
+  });
+}
+
+function renderTaskDetail(task, isCompleted = false) {
+  const priorityClass = task.priority === 'critical' ? 'critical' :
+                        task.priority === 'high' ? 'high' : 'medium';
+  const statusIcon = isCompleted ? (task.status === 'completed' ? '✅' : '❌') : '📋';
+
+  return `
+    <div class="task-card ${priorityClass} ${isCompleted ? task.status : ''}" style="margin-bottom: 16px; animation: fadeInUp 0.4s ease both;">
+      <div class="task-meta">
+        <div class="task-title">${statusIcon} ${task.title}</div>
+        ${!isCompleted ? `<div class="task-timer ${task.timeLeft <= 3 ? 'urgent' : ''}">⏱ ${task.timeLeft} мес.</div>` : ''}
+      </div>
+      <div style="font-size:12px; opacity:0.8; margin: 8px 0; line-height:1.5; white-space:pre-line;">${task.description}</div>
+      ${!isCompleted ? `
+        <div class="task-progress-bar">
+          <div class="task-progress-fill ${task.progress >= 100 ? 'done' : ''}" style="width: ${task.progress}%"></div>
+        </div>
+        <div class="task-stats">
+          Прогресс: ${task.progress}% ·
+          ${getResourceName(task.target.resource)}: ${state.resources[task.target.resource] || 0}/${task.target.value}
+        </div>
+      ` : ''}
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size:11px; opacity:0.6; margin-bottom:4px;">📜 Исторический контекст:</div>
+        <div style="font-size:12px; line-height:1.5; white-space:pre-line; opacity:0.9;">${task.historicalContext}</div>
+      </div>
+      ${isCompleted ? `
+        <div style="margin-top: 8px; font-size:12px; line-height:1.5; white-space:pre-line;">
+          <strong>${task.status === 'completed' ? '✅ Итог:' : '❌ Последствия:'}</strong><br>
+          ${task.status === 'completed' ? task.completionText : task.penalties.dossier}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+export function getResourceName(key) {
+  const names = {
+    coal: '⛏ Уголь', metal: '🔩 Металл', grain: '🌾 Зерно',
+    oil: '🛢 Нефть', science: '🔬 Наука', wood: '🌲 Лес',
+    goods: '📦 Товары', trust: '❤ Доверие', efficiency: '📈 План',
+    tech: '⚡ Тех', tension: '☢ Напряжение',
+  };
+  return names[key] || key;
+}
+
+export function formatEffects(effects) {
+  if (!effects) return '';
+  const parts = [];
+  for (const [k, v] of Object.entries(effects)) {
+    const sign = v > 0 ? '+' : '';
+    parts.push(`${sign}${v} ${getResourceName(k)}`);
+  }
+  return parts.join(', ');
+}
+
+export function setupModals() {
+  const side = document.getElementById('side');
+
+  if (side) {
+    side.addEventListener('click', (e) => {
+      if (window.innerWidth >= 900) return;
+      const rect = side.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      if (y < 30) {
+        side.classList.toggle('expanded');
+      }
+    });
+
+    let startY = 0;
+    side.addEventListener('touchstart', (e) => {
+      if (window.innerWidth >= 900) return;
+      const rect = side.getBoundingClientRect();
+      const y = e.touches[0].clientY - rect.top;
+      if (y < 30) {
+        startY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    side.addEventListener('touchend', (e) => {
+      if (window.innerWidth >= 900) return;
+      if (!startY) return;
+      const endY = e.changedTouches[0].clientY;
+      const diff = endY - startY;
+      if (Math.abs(diff) > 30) {
+        if (diff > 0) {
+          side.classList.remove('expanded');
+        } else {
+          side.classList.add('expanded');
+        }
+      }
+      startY = 0;
+    }, { passive: true });
+  }
+
+  const btnDossier = document.getElementById('btn-dossier');
+  const modalDossier = document.getElementById('dossier-modal');
+  const btnCloseDossier = document.getElementById('btn-close-dossier');
+
+  if (btnDossier) {
+    btnDossier.onclick = () => renderDossier();
+  }
+  if (btnCloseDossier) {
+    btnCloseDossier.onclick = () => {
+      closeModalAnimated(modalDossier);
+    };
+  }
+  if (modalDossier) {
+    modalDossier.addEventListener('click', (e) => {
+      if (e.target === modalDossier) closeModalAnimated(modalDossier);
+    });
+  }
+
+  const btnTasks = document.getElementById('btn-tasks');
+  const modalTasks = document.getElementById('tasks-modal');
+  const btnCloseTasks = document.getElementById('btn-close-tasks');
+
+  if (btnTasks) {
+    btnTasks.onclick = () => renderAllTasks();
+  }
+  if (btnCloseTasks) {
+    btnCloseTasks.onclick = () => {
+      closeModalAnimated(modalTasks);
+    };
+  }
+  if (modalTasks) {
+    modalTasks.addEventListener('click', (e) => {
+      if (e.target === modalTasks) closeModalAnimated(modalTasks);
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (modalDossier && modalDossier.style.display === 'flex') closeModalAnimated(modalDossier);
+      if (modalTasks && modalTasks.style.display === 'flex') closeModalAnimated(modalTasks);
+    }
+  });
+}
+
+function closeModalAnimated(modal) {
+  if (!modal) return;
+  const card = modal.querySelector('.meeting-card');
+  if (card) {
+    card.style.animation = 'modalCardOut 0.3s ease forwards';
+  }
+  modal.style.animation = 'modalBgOut 0.3s ease forwards';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.style.animation = '';
+    if (card) card.style.animation = '';
+  }, 300);
+}
