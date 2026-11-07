@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0f18">
 <title>Акт I — Раздел мира · Балтийский форум</title>
 <link rel="stylesheet" href="css/game.css">
@@ -57,7 +57,7 @@
 <div id="game">
   <canvas id="canvas"></canvas>
 
-  <!-- ============ ОНБОРДИНГ (без active — показывается из JS) ============ -->
+  <!-- ============ ОНБОРДИНГ ============ -->
   <div id="onboarding" class="screen">
     <div class="ob-container">
       <div class="ob-header">
@@ -69,6 +69,7 @@
       </div>
 
       <div class="ob-body" id="ob-body">
+        <!-- Слайд 1 -->
         <div class="ob-slide active" data-slide="0">
           <div class="ob-slide-title">Добро пожаловать</div>
           <div class="ob-slide-subtitle">Интерактивная историческая стратегия</div>
@@ -79,6 +80,7 @@
           </div>
         </div>
 
+        <!-- Слайд 2 -->
         <div class="ob-slide" data-slide="1">
           <div class="ob-slide-title">О проекте</div>
           <div class="ob-slide-subtitle">Зачем существует игра</div>
@@ -95,65 +97,103 @@
           </div>
         </div>
 
+        <!-- Слайд 3: Экономика -->
         <div class="ob-slide" data-slide="2">
+          <div class="ob-slide-title">Экономика</div>
+          <div class="ob-slide-subtitle">Как возродить страну из руин</div>
+          <div class="ob-content">
+            <p>
+              Восстановление страны требует ресурсов. Но ресурсы не появляются из воздуха — их нужно добывать. Помните: <strong>каждое здание нужно ставить в правильный регион</strong>. Урал богат металлом, Поволжье — зерном, а Донбасс — углём.
+            </p>
+            <p>
+              В игре есть 4 добывающих здания (Шахта, Совхоз, Нефтевышка, Лесозаготовка). Они автоматически добывают тот ресурс, которым богат регион. Если ресурса в регионе нет — здание не принесёт пользы.
+            </p>
+          </div>
+          <div class="ob-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <div class="ob-card" style="border-left: 3px solid #ffd27a;">
+              <div class="ob-card-title">⛏ Шахта</div>
+              <div class="ob-card-text"><strong>Что делает:</strong> Добывает уголь или металл.<br><strong>Где ставить:</strong> Урал (Металл), Донбасс (Уголь), Восточная Сибирь (Уголь).<br><strong>Зачем нужно:</strong> Металл нужен для строительства, уголь — для работы заводов.</div>
+            </div>
+            <div class="ob-card" style="border-left: 3px solid #6bcb77;">
+              <div class="ob-card-title">🌾 Совхоз</div>
+              <div class="ob-card-text"><strong>Что делает:</strong> Производит зерно.<br><strong>Где ставить:</strong> Поволжье, Средняя Азия, Донбасс, Закавказье.<br><strong>Зачем нужно:</strong> Кормит города. Без еды падает доверие и начинается голод.</div>
+            </div>
+            <div class="ob-card" style="border-left: 3px solid #ffd93d;">
+              <div class="ob-card-title">🛢 Нефтевышка</div>
+              <div class="ob-card-text"><strong>Что делает:</strong> Добывает нефть.<br><strong>Где ставить:</strong> Закавказье, Поволжье, Западная Сибирь.<br><strong>Зачем нужно:</strong> Топливо для промышленности и будущего транспорта.</div>
+            </div>
+            <div class="ob-card" style="border-left: 3px solid #8a9aaa;">
+              <div class="ob-card-title">🏭 Завод</div>
+              <div class="ob-card-text"><strong>Что делает:</strong> Перерабатывает уголь и металл в Товары.<br><strong>Где ставить:</strong> Москва, Ленинград, Урал.<br><strong>Зачем нужно:</strong> Товары повышают уровень жизни и нужны для выполнения планов.</div>
+            </div>
+            <div class="ob-card" style="border-left: 3px solid #8a9aaa;">
+              <div class="ob-card-title">🔬 НИИ</div>
+              <div class="ob-card-text"><strong>Что делает:</strong> Генерирует очки науки.<br><strong>Где ставить:</strong> Москва, Ленинград.<br><strong>Зачем нужно:</strong> Наука — это ваше будущее. Она открывает новые технологии и позволяет завершить Атомный проект.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Слайд 4: Регионы -->
+        <div class="ob-slide" data-slide="3">
           <div class="ob-slide-title">Как устроен мир</div>
           <div class="ob-slide-subtitle">Регионы, ресурсы, решения</div>
           <div class="ob-content">
             <p>Страна разделена на <strong>10 регионов</strong>, каждый со своей специализацией и ресурсами. Ваша задача — восстановить экономику, обеспечить людей и подготовиться к новым вызовам.</p>
           </div>
           <div class="ob-grid">
-            <div class="ob-card">
-              <div class="ob-card-icon">🗺</div>
-              <div class="ob-card-title">Регионы</div>
-              <div class="ob-card-text">Москва, Урал, Донбасс, Поволжье и другие. В каждом — свои ресурсы и специализация. Урал — металлургия, Донбасс — уголь, Поволжье — нефть.</div>
-            </div>
-            <div class="ob-card">
-              <div class="ob-card-icon">⛏</div>
-              <div class="ob-card-title">Ресурсы</div>
-              <div class="ob-card-text">Уголь, металл, зерно, нефть, наука, лес, товары. Стройте шахты, заводы, совхозы. Следите за балансом — голод или дефицит ресурсов пагубно влияет на доверие.</div>
-            </div>
-            <div class="ob-card">
-              <div class="ob-card-icon">📋</div>
-              <div class="ob-card-title">Задачи</div>
-              <div class="ob-card-text">Восстановление Донбасса, ДнепроГЭС, снабжение городов. У каждой задачи есть срок, награда и последствия провала.</div>
-            </div>
-            <div class="ob-card">
-              <div class="ob-card-icon">🏛</div>
-              <div class="ob-card-title">События</div>
-              <div class="ob-card-text">Доктрина Трумэна, Берлинский кризис, атомный проект. Реальные развилки с историческими и альтернативными вариантами.</div>
-            </div>
-            <div class="ob-card">
-              <div class="ob-card-icon">❤</div>
-              <div class="ob-card-title">Доверие</div>
-              <div class="ob-card-text">Ключевая шкала: если народ не доверяет власти, страна рушится. Заботьтесь о людях, иначе получите восстания.</div>
-            </div>
-            <div class="ob-card">
-              <div class="ob-card-icon">⏱</div>
-              <div class="ob-card-title">Время</div>
-              <div class="ob-card-text">Игра идёт в реальном времени. Ускоряйте, замедляйте, ставьте на паузу. 48 игровых месяцев — путь от разрухи до нового мира.</div>
-            </div>
+            <div class="ob-card"><div class="ob-card-icon">🗺</div><div class="ob-card-title">Регионы</div><div class="ob-card-text">Москва, Урал, Донбасс, Поволжье и другие. В каждом — свои ресурсы и специализация. Урал — металлургия, Донбасс — уголь, Поволжье — нефть.</div></div>
+            <div class="ob-card"><div class="ob-card-icon">⛏</div><div class="ob-card-title">Ресурсы</div><div class="ob-card-text">Уголь, металл, зерно, нефть, наука, лес, товары. Стройте шахты, заводы, совхозы. Следите за балансом — голод или дефицит ресурсов пагубно влияет на доверие.</div></div>
+            <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-title">Задачи</div><div class="ob-card-text">Восстановление Донбасса, ДнепроГЭС, снабжение городов. У каждой задачи есть срок, награда и последствия провала.</div></div>
+            <div class="ob-card"><div class="ob-card-icon">🏛</div><div class="ob-card-title">События</div><div class="ob-card-text">Доктрина Трумэна, Берлинский кризис, атомный проект. Реальные развилки с историческими и альтернативными вариантами.</div></div>
+            <div class="ob-card"><div class="ob-card-icon">❤</div><div class="ob-card-title">Доверие</div><div class="ob-card-text">Ключевая шкала: если народ не доверяет власти, страна рушится. Заботьтесь о людях, иначе получите восстания.</div></div>
+            <div class="ob-card"><div class="ob-card-icon">⏱</div><div class="ob-card-title">Время</div><div class="ob-card-text">Игра идёт в реальном времени. Ускоряйте, замедляйте, ставьте на паузу. 48 игровых месяцев — путь от разрухи до нового мира.</div></div>
           </div>
         </div>
 
-        <div class="ob-slide" data-slide="3">
-          <div class="ob-slide-title">Управление</div>
-          <div class="ob-slide-subtitle">Как играть</div>
-          <div class="ob-content">
-            <p>Основные действия — на карте и через нижнюю панель. Вот шпаргалка по управлению:</p>
-          </div>
-          <div class="ob-controls-grid">
-            <div class="ob-control"><div class="ob-key">ЛКМ</div><div class="ob-key-text">Выбор региона на карте</div></div>
-            <div class="ob-control"><div class="ob-key">Drag</div><div class="ob-key-text">Панорама карты</div></div>
-            <div class="ob-control"><div class="ob-key">Колесо</div><div class="ob-key-text">Зум камеры</div></div>
-            <div class="ob-control"><div class="ob-key">Space</div><div class="ob-key-text">Пауза / возобновление</div></div>
-            <div class="ob-control"><div class="ob-key">1</div><div class="ob-key-text">Скорость x1</div></div>
-            <div class="ob-control"><div class="ob-key">2</div><div class="ob-key-text">Скорость x2</div></div>
-            <div class="ob-control"><div class="ob-key">3</div><div class="ob-key-text">Скорость x3</div></div>
-            <div class="ob-control"><div class="ob-key">Esc</div><div class="ob-key-text">Меню паузы / настройки</div></div>
-          </div>
-          <div class="ob-content" style="margin-top: 20px;">
-            <p><strong>Стратегия:</strong> не гонитесь за всем сразу. Сначала восстановите базовые ресурсы — уголь и металл. Затем займитесь зерном, чтобы не упало доверие. Следите за задачами: провал критических задач может стоить вам всей игры.</p>
-            <p><strong>Помните:</strong> это историческая игра. Здесь нет «правильного» ответа — есть только последствия ваших решений.</p>
+        <!-- Слайд 5: Как играть -->
+        <div class="ob-slide" data-slide="4">
+          <div class="ob-slide-title">Как играть</div>
+          <div class="ob-slide-subtitle">Пошаговая инструкция для новичка</div>
+          
+          <div class="ob-content" style="font-size: 15px; line-height: 1.7;">
+            <p>Игра не требует сложных комбинаций. Вот базовый цикл, который поможет вам выжить и победить:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+              <div style="background: rgba(30, 40, 55, 0.6); border: 1px solid #3a4a5a; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 16px; font-weight: 700; color: #ffd27a; margin-bottom: 8px;">Шаг 1. Выберите регион</div>
+                <div style="font-size: 14px; color: #c8d4e0; line-height: 1.6;">
+                  Кликните левой кнопкой мыши по любой точке на карте. Справа откроется панель «Штаб», где будет указано, какие ресурсы добываются в этом регионе и сколько там свободных мест под застройку.
+                </div>
+              </div>
+
+              <div style="background: rgba(30, 40, 55, 0.6); border: 1px solid #3a4a5a; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 16px; font-weight: 700; color: #ffd27a; margin-bottom: 8px;">Шаг 2. Постройте добычу</div>
+                <div style="font-size: 14px; color: #c8d4e0; line-height: 1.6;">
+                  В панели региона нажмите на кнопку <strong>⛏ Шахта</strong>. Если в регионе есть металл или уголь, шахта начнет их добывать. Если ресурсов не хватает на строительство — подождите, пока накопятся базовые запасы, или ускорьте время.
+                </div>
+              </div>
+
+              <div style="background: rgba(30, 40, 55, 0.6); border: 1px solid #3a4a5a; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 16px; font-weight: 700; color: #ffd27a; margin-bottom: 8px;">Шаг 3. Управляйте временем</div>
+                <div style="font-size: 14px; color: #c8d4e0; line-height: 1.6;">
+                  Вверху экрана находится таймер и кнопки скорости. Нажмите <strong>▶▶</strong> (или клавишу 2), чтобы ресурсы копились быстрее. Не забывайте ставить игру на паузу (кнопка ⏸ или Пробел), когда принимаете сложные решения.
+                </div>
+              </div>
+
+              <div style="background: rgba(30, 40, 55, 0.6); border: 1px solid #3a4a5a; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 16px; font-weight: 700; color: #ffd27a; margin-bottom: 8px;">Шаг 4. Следите за задачами</div>
+                <div style="font-size: 14px; color: #c8d4e0; line-height: 1.6;">
+                  В правой панели «Штаб» появляются задачи (например, «Восстановить Донбасс»). Нажмите на карточку задачи, чтобы прочитать подробную историческую справку и условия. У каждой задачи есть срок — если провалить критическую задачу, игра может закончиться.
+                </div>
+              </div>
+
+              <div style="background: rgba(30, 40, 55, 0.6); border: 1px solid #3a4a5a; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 16px; font-weight: 700; color: #ffd27a; margin-bottom: 8px;">Шаг 5. Не забывайте про еду</div>
+                <div style="font-size: 14px; color: #c8d4e0; line-height: 1.6;">
+                  Это главное правило выживания. Стройте <strong>🌾 Совхозы</strong>, чтобы производить зерно. Если зерна не хватает, шкала «Доверие» (❤) начнёт падать. Если она упадёт до нуля, народ свергнет вас. Всегда держите запас продовольствия.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -161,6 +201,7 @@
       <div class="ob-footer">
         <div class="ob-progress">
           <div class="ob-dot active"></div>
+          <div class="ob-dot"></div>
           <div class="ob-dot"></div>
           <div class="ob-dot"></div>
           <div class="ob-dot"></div>
@@ -191,17 +232,19 @@
         <span class="icon">⚙</span>
         <span class="text">Настройки<span class="hint">Скорость, звук, подсказки</span></span>
       </button>
+      
       <button id="btn-view-onboarding" class="menu-btn">
         <span class="icon">📖</span>
-        <span class="text">Справка о проекте<span class="hint">О проекте и устройстве игры</span></span>
+        <span class="text">Справка и Обучение<span class="hint">Как играть и устройство мира</span></span>
       </button>
+      
       <button id="btn-about" class="menu-btn">
         <span class="icon">ℹ</span>
         <span class="text">Об игре<span class="hint">Историческая справка и управление</span></span>
       </button>
 
       <div class="menu-footer">
-        MVP v0.5 · Акт I — Раздел мира · 1946–1949<br>
+        MVP v1.0 · Акт I — Раздел мира · 1946–1949<br>
         Балтийский форум · 2025
       </div>
     </div>
@@ -220,7 +263,6 @@
   <div id="settings-screen" class="screen">
     <div class="settings-inner">
       <h2>⚙ Настройки</h2>
-
       <div class="setting-row">
         <label>Скорость по умолчанию<span class="desc">С какой скоростью начнётся игра</span></label>
         <select id="set-default-speed" style="background:#2a3545; color:#e8e8e8; border:1px solid #3a4a5a; padding:8px; border-radius:4px;">
@@ -229,23 +271,19 @@
           <option value="3">x3</option>
         </select>
       </div>
-
       <div class="setting-row">
         <label>Громкость<span class="desc">Общий уровень звука</span></label>
         <input type="range" id="set-volume" min="0" max="100" value="70">
         <span id="set-volume-label" style="margin-left:8px; min-width:44px; text-align:right;">70%</span>
       </div>
-
       <div class="setting-row">
         <label>Подсказки<span class="desc">Показывать всплывающие подсказки</span></label>
         <input type="checkbox" id="set-tooltips" checked>
       </div>
-
       <div class="settings-actions">
         <button id="btn-settings-back">← Назад</button>
         <button id="btn-settings-apply" class="primary">Применить</button>
       </div>
-
       <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
         <button id="btn-reset-progress" style="width:100%; background:#5a2a2a; border-color:#7a3a3a;">
           🗑 Сбросить весь прогресс и справку
@@ -307,6 +345,7 @@
 
   <!-- ============ UI ИГРЫ ============ -->
   <div id="ui">
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <div id="top" class="panel">
       <div class="res">⛏ Уголь: <span class="val" id="r-coal">50</span><span class="delta" id="d-coal"></span></div>
       <div class="res">🔩 Металл: <span class="val" id="r-metal">40</span><span class="delta" id="d-metal"></span></div>
@@ -318,43 +357,45 @@
       <div class="res">❤ Доверие: <span class="val" id="r-trust">60</span></div>
       <div class="res">📈 План: <span class="val" id="r-eff">50</span></div>
 
-      <div id="time-block" style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-        <div id="game-date" style="font-weight:600; color:#ffd27a; font-size:14px; min-width:160px; text-align:right;">
-          1 Январь 1946
+      <!-- БЛОК ВРЕМЕНИ И СКОРОСТИ -->
+      <div id="time-block">
+        <div id="game-date">1 Январь 1946</div>
+        <div class="time-progress-bar">
+          <div id="time-progress-fill"></div>
         </div>
-        <div style="width:100px; height:6px; background:rgba(0,0,0,0.4); border-radius:3px; overflow:hidden;">
-          <div id="time-progress-fill" style="height:100%; background:#ffd27a; width:0%; transition: width 0.1s linear;"></div>
+        <div class="speed-controls">
+          <button id="btn-pause" title="Пауза (пробел)">⏸</button>
+          <button id="btn-speed-1" title="x1 (1)" class="active">▶</button>
+          <button id="btn-speed-2" title="x2 (2)">▶▶</button>
+          <button id="btn-speed-3" title="x3 (3)">▶▶▶</button>
+          <span id="speed-label">▶ x1</span>
         </div>
-        <span id="speed-label" style="font-size:12px; min-width:70px; text-align:center;">▶ x1</span>
       </div>
     </div>
 
+    <!-- КАРТА -->
     <div id="map"></div>
 
+    <!-- ПРАВАЯ ПАНЕЛЬ (ШТАБ) -->
     <div id="side">
+      <div id="side-header">Штаб</div>
       <div id="task-panel" class="panel">
         <div class="empty-state">Загрузка задач...</div>
       </div>
-
       <div id="region-panel" class="panel">
-        <h3 id="rp-name">Выберите регион</h3>
-        <div id="rp-info" style="font-size:13px; opacity:0.7; margin: 8px 0;">Кликните на регион на карте</div>
+        <h3 id="rp-name" style="color: #ffd27a; margin-bottom: 4px;">Выберите регион</h3>
+        <div id="rp-info" style="font-size:12px; opacity:0.6; margin-bottom: 8px;">Кликните на точку на карте</div>
         <div id="rp-buildings"></div>
         <div id="rp-actions" style="margin-top: 8px;"></div>
       </div>
-
       <div id="feed" class="panel">
-        <div style="font-weight:600; margin-bottom: 8px;">📜 Лента событий</div>
+        <div style="font-weight:600; color: #ffd27a; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">📜 Лента</div>
         <div id="feed-list"></div>
       </div>
     </div>
 
+    <!-- НИЖНЯЯ ПАНЕЛЬ -->
     <div id="bottom" class="panel">
-      <button id="btn-pause" title="Пауза (пробел)">⏸</button>
-      <button id="btn-speed-1" title="x1 (1)">▶</button>
-      <button id="btn-speed-2" title="x2 (2)">▶▶</button>
-      <button id="btn-speed-3" title="x3 (3)">▶▶▶</button>
-      <div style="width:1px; height:24px; background:#3a4a5a; margin:0 4px;"></div>
       <button id="btn-dossier">📖 Досье</button>
       <button id="btn-tasks">📋 Задачи</button>
       <div style="flex:1"></div>
@@ -362,57 +403,39 @@
     </div>
   </div>
 
-  <!-- ============ МОДАЛКА ЗАДАЧИ (ПРИНЯТИЕ) ============ -->
-  <div id="task-modal" style="
-    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
-    display: none; align-items: center; justify-content: center;
-    z-index: 150; padding: 16px;
-    backdrop-filter: blur(0px);
-    transition: backdrop-filter 0.3s, background 0.3s;
-  ">
+  <!-- ============ МОДАЛКИ ============ -->
+  <div id="task-modal" style="position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 150; padding: 16px; backdrop-filter: blur(0px); transition: backdrop-filter 0.3s, background 0.3s;">
     <div id="task-modal-card" class="meeting-card" style="max-width: 640px;"></div>
   </div>
-
-  <!-- ============ МОДАЛКА РЕЗУЛЬТАТА ЗАДАЧИ ============ -->
-  <div id="task-result-modal" style="
-    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
-    display: none; align-items: center; justify-content: center;
-    z-index: 155; padding: 16px;
-    backdrop-filter: blur(0px);
-    transition: backdrop-filter 0.3s, background 0.3s;
-  ">
+  <div id="task-result-modal" style="position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 155; padding: 16px; backdrop-filter: blur(0px); transition: backdrop-filter 0.3s, background 0.3s;">
     <div id="task-result-card" class="meeting-card" style="max-width: 640px;"></div>
   </div>
-
-  <!-- ============ МОДАЛКА СОБЫТИЙ ============ -->
   <div id="meeting-modal">
     <div class="meeting-card" id="meeting-card"></div>
   </div>
-
-  <!-- ============ ДОСЬЕ ============ -->
-  <div id="dossier-modal" style="
-    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
-    display: none; align-items: center; justify-content: center;
-    z-index: 100; padding: 16px;
-  ">
+  <div id="dossier-modal" style="position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px;">
     <div class="meeting-card" id="dossier-card" style="max-width: 700px;">
       <h2>📖 Досье</h2>
       <div id="dossier-list"></div>
       <button id="btn-close-dossier" style="margin-top: 16px; width: 100%;">Закрыть</button>
     </div>
   </div>
-
-  <!-- ============ ВСЕ ЗАДАЧИ ============ -->
-  <div id="tasks-modal" style="
-    position: absolute; inset: 0; background: rgba(0,0,0,0.85);
-    display: none; align-items: center; justify-content: center;
-    z-index: 100; padding: 16px;
-  ">
+  <div id="tasks-modal" style="position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px;">
     <div class="meeting-card" id="tasks-card" style="max-width: 700px;">
       <h2>📋 Все задачи</h2>
       <div id="tasks-list"></div>
       <button id="btn-close-tasks" style="margin-top: 16px; width: 100%;">Закрыть</button>
     </div>
+  </div>
+
+  <!-- ============ МОДАЛКА GAME OVER ============ -->
+  <div id="game-over-modal" style="
+    position: absolute; inset: 0; background: rgba(0,0,0,0.92);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 16px;
+    backdrop-filter: blur(4px);
+  ">
+    <div id="game-over-card" class="meeting-card" style="max-width: 560px; border-color: #5a2a2a;"></div>
   </div>
 
   <div id="toast"></div>

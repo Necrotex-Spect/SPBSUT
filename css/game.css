@@ -20,14 +20,16 @@ html, body {
 }
 #ui > * { pointer-events: auto; }
 
+/* ========== ПАНЕЛИ ========== */
 .panel {
-  background: rgba(10, 15, 24, 0.92);
+  background: rgba(16, 22, 32, 0.95); 
   border: 1px solid #3a4a5a;
   border-radius: 6px;
-  padding: 10px;
-  backdrop-filter: blur(6px);
+  padding: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); 
 }
 
+/* ========== ВЕРХНЯЯ ПАНЕЛЬ ========== */
 #top {
   grid-area: top; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
   font-size: 13px;
@@ -48,36 +50,98 @@ html, body {
 .res .delta { font-size: 11px; opacity: 0.7; }
 .delta.pos { color: #7aff9a; } .delta.neg { color: #ff7a7a; }
 
+/* ========== БЛОК ВРЕМЕНИ ========== */
+#time-block {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+#game-date {
+  font-weight: 600; color: #ffd27a; font-size: 14px;
+  min-width: 140px; text-align: right;
+}
+
+.time-progress-bar {
+  width: 100px; height: 6px;
+  background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden;
+}
+
+#time-progress-fill {
+  height: 100%; background: #ffd27a; width: 0%;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(255,210,122,0.6);
+}
+
+.speed-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+  padding: 2px;
+  border-radius: 6px;
+}
+
+.speed-controls button {
+  min-height: 32px; min-width: 32px;
+  padding: 4px 8px; font-size: 12px;
+  border: none; background: transparent;
+}
+.speed-controls button:hover {
+  background: rgba(255,255,255,0.1); box-shadow: none;
+}
+.speed-controls button.active {
+  background: #ffd27a; color: #0a0f18;
+}
+
+#speed-label {
+  font-size: 12px; padding: 0 8px; color: #ffd27a; font-weight: 600;
+  min-width: 50px; text-align: center;
+}
+
 #map { grid-area: map; pointer-events: none; }
 
-/* ========== БОКОВАЯ ПАНЕЛЬ — ДЕСКТОП ========== */
+/* ========== ПРАВАЯ ПАНЕЛЬ (ШТАБ) ========== */
 #side {
   grid-area: side;
-  display: flex; flex-direction: column; gap: 8px;
-  /* ВАЖНО: вся колонка прокручивается, если не влезает */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;            /* критично для grid+flex, чтобы скролл работал */
+  height: 100%;
   max-height: 100%;
-  padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: #3a4a5a transparent;
+  background: #0a0f18; 
+  border-left: 1px solid #3a4a5a; 
+  padding-left: 10px;
+  padding-right: 2px;
   animation: slideInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
+
 #side::-webkit-scrollbar { width: 6px; }
 #side::-webkit-scrollbar-thumb { background: #3a4a5a; border-radius: 3px; }
-#side::-webkit-scrollbar-track { background: transparent; }
 
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(60px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* Вложенные блоки — БЕЗ собственных скроллов и max-height.
-   Они растягиваются по содержимому, скроллится весь #side. */
-#task-panel,
-#region-panel,
-#feed {
+#side-header {
+  color: #5a6a7a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 0 0 4px;
+  border-bottom: 1px solid #2a3a4a;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+#task-panel, #region-panel, #feed {
   flex: 0 0 auto;
   max-height: none;
   overflow: visible;
@@ -96,6 +160,7 @@ html, body {
 }
 .feed-item.meeting { border-left-color: #ffd27a; }
 
+/* ========== НИЖНЯЯ ПАНЕЛЬ ========== */
 #bottom {
   grid-area: bottom; display: flex; gap: 8px; align-items: center;
   animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -106,6 +171,7 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ========== КНОПКИ ========== */
 button {
   background: #2a3a4a; color: #e8e8e8; border: 1px solid #4a5a6a;
   padding: 10px 16px; border-radius: 4px; cursor: pointer;
@@ -132,14 +198,14 @@ button:active::after {
 }
 
 /* ========== МОДАЛКИ ========== */
-#meeting-modal, #task-modal {
+#meeting-modal, #task-modal, #task-result-modal {
   position: absolute; inset: 0; background: rgba(0,0,0,0.85);
   display: none; align-items: center; justify-content: center;
   z-index: 150; padding: 16px;
   backdrop-filter: blur(0px);
   transition: backdrop-filter 0.3s, background 0.3s;
 }
-#meeting-modal.open, #task-modal.open {
+#meeting-modal.open, #task-modal.open, #task-result-modal.open {
   display: flex;
   animation: modalBgIn 0.3s ease forwards;
 }
@@ -148,7 +214,7 @@ button:active::after {
   to { background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); }
 }
 
-.meeting-card, #task-modal-card {
+.meeting-card, #task-modal-card, #task-result-card {
   background: #1e2530; border: 1px solid #5a6a7a; border-radius: 8px;
   max-width: 600px; width: 100%; padding: 20px;
   max-height: 90vh; overflow-y: auto;
@@ -157,8 +223,8 @@ button:active::after {
   scrollbar-width: thin;
   scrollbar-color: #3a4a5a transparent;
 }
-.meeting-card::-webkit-scrollbar, #task-modal-card::-webkit-scrollbar { width: 6px; }
-.meeting-card::-webkit-scrollbar-thumb, #task-modal-card::-webkit-scrollbar-thumb { background: #3a4a5a; border-radius: 3px; }
+.meeting-card::-webkit-scrollbar, #task-modal-card::-webkit-scrollbar, #task-result-card::-webkit-scrollbar { width: 6px; }
+.meeting-card::-webkit-scrollbar-thumb, #task-modal-card::-webkit-scrollbar-thumb, #task-result-card::-webkit-scrollbar-thumb { background: #3a4a5a; border-radius: 3px; }
 
 @keyframes modalCardIn {
   from { opacity: 0; transform: scale(0.85) translateY(30px); }
@@ -441,7 +507,7 @@ button:active::after {
   animation: fadeInUp 0.5s ease 0.2s both;
 }
 
-/* ========== НАСТРОЙКИ ========== */
+/* ========== НАСТРОЙКИ / ОБ ИГРЕ ========== */
 #settings-screen, #about-screen {
   align-items: center; justify-content: center;
   padding: 20px;
@@ -546,6 +612,22 @@ button:active::after {
   80% { transform: translateX(4px); }
 }
 
+/* ========== ТУТОРИАЛ ========== */
+.tutorial-highlight {
+  animation: tutorialPulse 2s infinite;
+}
+
+@keyframes tutorialPulse {
+  0% { box-shadow: 0 0 0 2px #ffd27a, 0 0 10px rgba(255, 210, 122, 0.3); }
+  50% { box-shadow: 0 0 0 4px #ffd27a, 0 0 25px rgba(255, 210, 122, 0.6); }
+  100% { box-shadow: 0 0 0 2px #ffd27a, 0 0 10px rgba(255, 210, 122, 0.3); }
+}
+
+#tutorial-popup {
+  display: none;
+  pointer-events: auto;
+}
+
 /* ========== ПОРТРЕТ ========== */
 #rotate-hint {
   display: none; position: fixed; inset: 0; background: #0a0f18;
@@ -568,7 +650,33 @@ button:active::after {
     gap: 4px; padding: 4px;
   }
 
-  /* На мобильных #side — фиксированный bottom-sheet */
+  #top {
+    flex-direction: row;
+    gap: 6px;
+    padding: 8px;
+    align-items: flex-start;
+  }
+  .res {
+    font-size: 10px;
+    padding: 2px 4px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+  }
+  .res .val { min-width: auto; }
+
+  #time-block {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 6px;
+    margin-top: 4px;
+  }
+  #game-date { text-align: left; font-size: 12px; min-width: auto; }
+  .time-progress-bar { width: 60px; }
+  .speed-controls button { min-height: 28px; min-width: 28px; font-size: 10px; padding: 2px 6px; }
+  #speed-label { display: none; }
+
   #side {
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -591,15 +699,13 @@ button:active::after {
     box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
     scrollbar-width: thin;
     scrollbar-color: #3a4a5a transparent;
-    animation: none;  /* отключаем slideInRight на мобильном */
+    animation: none;
   }
 
   #side::-webkit-scrollbar { width: 6px; }
   #side::-webkit-scrollbar-thumb { background: #3a4a5a; border-radius: 3px; }
 
-  #side.expanded {
-    transform: translateY(0);
-  }
+  #side.expanded { transform: translateY(0); }
 
   #side::before {
     content: '━━━━━━━';
@@ -616,32 +722,45 @@ button:active::after {
     pointer-events: auto;
   }
 
-  #task-panel,
-  #region-panel,
-  #feed {
+  #task-panel, #region-panel, #feed {
     flex: 0 0 auto;
     max-height: none;
     overflow: visible;
     touch-action: pan-y;
   }
+  
+  #side-header { display: none; }
 
   #bottom {
-    grid-area: bottom;
-    flex-wrap: wrap;
-    gap: 4px;
+    position: fixed;
+    left: 0; right: 0;
+    bottom: 60px;
+    grid-area: auto;
     z-index: 55;
+    background: rgba(10, 15, 24, 0.95);
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+    padding: 6px 10px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: none;
+    animation: none;
   }
   #bottom button {
-    min-height: 40px;
-    min-width: 40px;
-    padding: 8px 10px;
-    font-size: 13px;
+    min-height: 38px;
+    padding: 6px 12px;
+    font-size: 12px;
+    flex: 1;
+    max-width: 140px;
+    border: 1px solid #3a4a5a;
+    background: #1a2433;
   }
-
+  #status { display: none; }
+  
   .panel { padding: 8px; }
-  #top { font-size: 11px; gap: 6px; }
-  .res { font-size: 11px; }
-  #game-date { font-size: 12px !important; min-width: 120px !important; }
+  #top .res { font-size: 10px; }
 
   .ob-container { padding: 16px; }
   .ob-slide-title { font-size: 24px; }
@@ -649,26 +768,9 @@ button:active::after {
   .ob-grid { grid-template-columns: 1fr; }
   .ob-controls-grid { grid-template-columns: 1fr; }
 
-  .meeting-card, #task-modal-card {
+  .meeting-card, #task-modal-card, #task-result-card {
     padding: 16px;
     max-height: 92vh;
   }
   .meeting-card h2 { font-size: 18px; }
-}
-
-#task-result-modal.open {
-  display: flex;
-  animation: modalBgIn 0.3s ease forwards;
-}
-
-#task-result-card {
-  animation: modalCardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-/* На мобильных — компактнее */
-@media (max-width: 900px) {
-  #task-result-card {
-    padding: 16px !important;
-    max-height: 92vh;
-  }
 }

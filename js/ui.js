@@ -128,6 +128,9 @@ export function selectRegion(id) {
     });
   }
 
+  // ОТПРАВЛЯЕМ СОБЫТИЕ ДЛЯ ТУТОРИАЛА
+  window.dispatchEvent(new CustomEvent('game-action', { detail: { type: 'region' } }));
+
   import('./scene.js').then(({ highlightRegion }) => highlightRegion(id)).catch(() => {});
 }
 
@@ -181,7 +184,7 @@ export function renderTasks() {
         const fillClass = isDone ? 'done' : (isUrgent ? 'danger' : '');
 
         html += `
-          <div class="task-card ${priorityClass}" style="animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.08}s both;">
+          <div class="task-card ${priorityClass}" onclick="window.openTaskModal('${task.id}')" style="cursor: pointer; animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.08}s both;">
             <div class="task-meta">
               <div class="task-title">${task.title}</div>
               <div class="task-timer ${isUrgent ? 'urgent' : ''}">⏱ ${task.timeLeft} мес.</div>
@@ -217,10 +220,31 @@ export function renderTasks() {
   });
 }
 
+// Глобальная функция для вызова модалки из HTML
+window.openTaskModal = (taskId) => {
+  import('./tasks.js').then(({ activeTasks }) => {
+    const task = activeTasks.find(t => t.id === taskId);
+    if (task) {
+      // Ставим игру на паузу при открытии задачи
+      state.paused = true;
+      
+      import('./task-modal.js').then(({ showTaskModal }) => {
+        showTaskModal(task, () => {
+          // После закрытия снимаем паузу (если не открыто другое меню)
+          state.paused = false;
+        });
+      });
+    }
+  });
+};
+
 export function renderDossier() {
   const modal = document.getElementById('dossier-modal');
   const list = document.getElementById('dossier-list');
   if (!modal || !list) return;
+
+  // Ставим игру на паузу
+  state.paused = true;
 
   if (!state.dossier || state.dossier.length === 0) {
     list.innerHTML = '<div class="empty-state">Досье пока пусто. Принимайте решения — они сохранятся здесь.</div>';
@@ -254,6 +278,9 @@ export function renderAllTasks() {
   const modal = document.getElementById('tasks-modal');
   const list = document.getElementById('tasks-list');
   if (!modal || !list) return;
+
+  // Ставим игру на паузу
+  state.paused = true;
 
   import('./tasks.js').then(({ activeTasks, completedTasks }) => {
     if (activeTasks.length === 0 && completedTasks.length === 0) {
@@ -387,11 +414,17 @@ export function setupModals() {
   if (btnCloseDossier) {
     btnCloseDossier.onclick = () => {
       closeModalAnimated(modalDossier);
+      // Снимаем паузу
+      if (state.paused) state.paused = false;
     };
   }
   if (modalDossier) {
     modalDossier.addEventListener('click', (e) => {
-      if (e.target === modalDossier) closeModalAnimated(modalDossier);
+      if (e.target === modalDossier) {
+        closeModalAnimated(modalDossier);
+        // Снимаем паузу
+        if (state.paused) state.paused = false;
+      }
     });
   }
 
@@ -405,18 +438,30 @@ export function setupModals() {
   if (btnCloseTasks) {
     btnCloseTasks.onclick = () => {
       closeModalAnimated(modalTasks);
+      // Снимаем паузу
+      if (state.paused) state.paused = false;
     };
   }
   if (modalTasks) {
     modalTasks.addEventListener('click', (e) => {
-      if (e.target === modalTasks) closeModalAnimated(modalTasks);
+      if (e.target === modalTasks) {
+        closeModalAnimated(modalTasks);
+        // Снимаем паузу
+        if (state.paused) state.paused = false;
+      }
     });
   }
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (modalDossier && modalDossier.style.display === 'flex') closeModalAnimated(modalDossier);
-      if (modalTasks && modalTasks.style.display === 'flex') closeModalAnimated(modalTasks);
+      if (modalDossier && modalDossier.style.display === 'flex') {
+        closeModalAnimated(modalDossier);
+        if (state.paused) state.paused = false;
+      }
+      if (modalTasks && modalTasks.style.display === 'flex') {
+        closeModalAnimated(modalTasks);
+        if (state.paused) state.paused = false;
+      }
     }
   });
 }

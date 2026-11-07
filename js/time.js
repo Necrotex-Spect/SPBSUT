@@ -3,10 +3,12 @@ import { addFeed, render } from './ui.js';
 import { tick } from './economy.js';
 import { updateTasksProgress, checkNewTask } from './tasks.js';
 import { showMeeting, showRandomEvent } from './events.js';
+import { showGameOver } from './game-over.js';
 
 let eventData = null;
 let lastFrame = 0;
 let running = false;
+let gameEnded = false;
 
 export function setEventData(data) { eventData = data; }
 
@@ -21,7 +23,7 @@ function loop(now) {
   const dt = Math.min((now - lastFrame) / 1000, 0.2);
   lastFrame = now;
 
-  if (!state.paused && state.speed > 0) {
+  if (!state.paused && state.speed > 0 && !gameEnded) {
     state.timeAccumulator += dt * state.speed;
 
     while (state.timeAccumulator >= state.MONTH_DURATION) {
@@ -32,6 +34,16 @@ function loop(now) {
 
   updateTimeUI();
   requestAnimationFrame(loop);
+}
+
+export function triggerFamineEvent() {
+  if (!eventData || gameEnded) return;
+  const famineEvent = eventData.randomEvents.find(e => e.id === 'famine_crisis');
+  const modalOpen = document.getElementById('meeting-modal').classList.contains('open');
+  
+  if (famineEvent && !modalOpen) {
+    showRandomEvent(famineEvent);
+  }
 }
 
 function advanceMonth() {
@@ -47,6 +59,15 @@ function advanceMonth() {
   updateTasksProgress();
   state.tick++;
 
+  // Проверка на проигрыш (Game Over)
+  if (state.scales.trust <= 0) {
+    gameEnded = true;
+    state.paused = true;
+    showGameOver();
+    return;
+  }
+
+  // Отложенные эффекты
   if (state.delayedEffects && state.delayedEffects.length) {
     const ready = state.delayedEffects.filter(e => e.targetTick <= state.tick);
     state.delayedEffects = state.delayedEffects.filter(e => e.targetTick > state.tick);
@@ -59,12 +80,19 @@ function advanceMonth() {
     });
   }
 
+  // Заседания
   const meeting = state.meetings.find(m => m.month === state.tick);
   if (meeting) showMeeting(meeting);
 
+  // Случайные события
   if (state.tick % 6 === 0 && eventData && Math.random() > 0.4) {
     const ev = eventData.randomEvents[Math.floor(Math.random() * eventData.randomEvents.length)];
     showRandomEvent(ev);
+  }
+
+  // Триггер голода
+  if (state.scales.trust < 40 && state.resources.grain < 5) {
+    triggerFamineEvent();
   }
 
   if (state.tick % 10 === 0 && eventData) checkNewTask(eventData);
@@ -103,10 +131,16 @@ function updateTimeUI() {
 }
 
 export function togglePause() {
+  if (gameEnded) return;
   state.paused = !state.paused;
 }
 
 export function setSpeed(s) {
+  if (gameEnded) return;
   state.speed = s;
   state.paused = false;
+}
+
+export function resetGameEnded() {
+  gameEnded = false;
 }

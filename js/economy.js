@@ -12,19 +12,23 @@ export function tick() {
       const b = state.buildings[bType];
       if (!b) return;
 
+      // Добыча ресурсов
       if (b.extractor) {
         const regionResources = r.resources || [];
-        const target = regionResources.find(res =>
-          ['coal', 'metal', 'oil', 'wood', 'grain'].includes(res)
-        );
+        let targetRes = null;
+        if (bType === 'farm') targetRes = regionResources.find(res => res === 'grain');
+        if (bType === 'mine') targetRes = regionResources.find(res => ['coal', 'metal'].includes(res));
+        if (bType === 'oil') targetRes = regionResources.find(res => res === 'oil');
+        if (bType === 'forest') targetRes = regionResources.find(res => res === 'wood');
 
-        if (target) {
-          state.resources[target] = (state.resources[target] || 0) + EXTRACTOR_YIELD;
-          state.deltas[target] += EXTRACTOR_YIELD;
+        if (targetRes) {
+          state.resources[targetRes] = (state.resources[targetRes] || 0) + EXTRACTOR_YIELD;
+          state.deltas[targetRes] += EXTRACTOR_YIELD;
         }
         return;
       }
 
+      // Переработка (Заводы)
       let canProduce = true;
       for (const [res, amt] of Object.entries(b.in || {})) {
         if ((state.resources[res] || 0) < amt) { canProduce = false; break; }
@@ -43,14 +47,40 @@ export function tick() {
     });
   });
 
-  const grainNeeded = Math.ceil(state.regions.length * 1.5);
+  // ============ СИСТЕМА ГОЛОДА ============
+  const grainNeeded = Math.ceil(state.regions.length * 1.5); // 15 единиц на 10 регионов
+  
   if (state.resources.grain >= grainNeeded) {
+    // Всё хорошо
     state.resources.grain -= grainNeeded;
     state.deltas.grain -= grainNeeded;
-    state.scales.trust = Math.min(100, state.scales.trust + 1);
+    
+    // Медленный рост доверия, если всё стабильно
+    if (state.scales.trust < 80) {
+      state.scales.trust = Math.min(100, state.scales.trust + 1);
+    }
   } else {
-    state.scales.trust = Math.max(0, state.scales.trust - 5);
-    addFeed('⚠ Дефицит зерна! Доверие падает.');
+    // ГОЛОД
+    const deficit = grainNeeded - state.resources.grain;
+    state.resources.grain = 0;
+    
+    // Чем больше дефицит, тем страшнее последствия
+    const trustLoss = 5 + Math.floor(deficit / 2);
+    state.scales.trust = Math.max(0, state.scales.trust - trustLoss);
+    
+    // Раз в 3 месяца при голоде выкидываем событие
+    if (state.tick % 3 === 0) {
+      addFeed(`⚠ КРИТИЧЕСКИЙ ДЕФИЦИТ ЗЕРНА! Не хватает ${deficit} ед. Доверие падает на ${trustLoss}.`);
+      
+      // Пытаемся вызвать событие «Голод» (если оно есть в tasks.json и модалка не открыта)
+      import('./tasks.js').then(({ loadTasks }) => {
+        // Мы не знаем, загружен ли tasks.json в этой области, поэтому вызовем глобально
+        // В идеале eventData должен быть доступен, но для простоты используем динамический импорт
+        import('./time.js').then(({ triggerFamineEvent }) => {
+          if (triggerFamineEvent) triggerFamineEvent();
+        });
+      });
+    }
   }
 }
 

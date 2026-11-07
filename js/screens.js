@@ -85,7 +85,6 @@ export function initOnboarding() {
     btnPrev.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('⬅ Назад');
       if (obSlideIndex > 0) {
         obSlideIndex--;
         updateOnboardingUI();
@@ -97,7 +96,6 @@ export function initOnboarding() {
     btnNext.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('➡ Далее, слайд:', obSlideIndex);
       if (obSlideIndex < obTotalSlides - 1) {
         obSlideIndex++;
         updateOnboardingUI();
@@ -111,7 +109,6 @@ export function initOnboarding() {
     btnSkip.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('⏭ Пропустить');
       finishOnboarding();
     };
   }
@@ -180,7 +177,7 @@ export function startLoading(onComplete) {
   }, 3000);
 
   let elapsed = 0;
-  const totalTime = 4000;
+  const totalTime = 3000;
   const interval = 80;
   const increment = (interval / totalTime) * 100;
 
@@ -316,8 +313,6 @@ export function setupScreenHandlers(callbacks) {
         e.stopPropagation();
         fn();
       };
-    } else {
-      console.warn('⚠ Кнопка не найдена:', id);
     }
   };
 

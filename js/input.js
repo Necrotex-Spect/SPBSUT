@@ -24,7 +24,10 @@ export function setupInput() {
   if (btnS1) btnS1.onclick = () => setSpeed(1);
   
   const btnS2 = document.getElementById('btn-speed-2');
-  if (btnS2) btnS2.onclick = () => setSpeed(2);
+  if (btnS2) btnS2.onclick = () => {
+    setSpeed(2);
+    window.dispatchEvent(new CustomEvent('game-action', { detail: { type: 'speed_2' } }));
+  };
   
   const btnS3 = document.getElementById('btn-speed-3');
   if (btnS3) btnS3.onclick = () => setSpeed(3);
