@@ -373,14 +373,14 @@ export function formatEffects(effects) {
 export function setupModals() {
   const side = document.getElementById('side');
 
+  // 1. Кнопка-язычок для сворачивания и разворачивания боковой панели (Штаба)
   if (side && !document.getElementById('side-toggle')) {
-    // Создаём кнопку-язычок для сворачивания/разворачивания боковой панели
     const toggleBtn = document.createElement('button');
     toggleBtn.id = 'side-toggle';
     toggleBtn.title = 'Свернуть / Развернуть Штаб';
     toggleBtn.textContent = '▶';
 
-    // На мобильных экранах по умолчанию сворачиваем панель, чтобы открыть Дальний Восток
+    // На мобильных устройствах по умолчанию сворачиваем панель, чтобы открыть карту
     const isMobileOrTablet = window.innerWidth <= 1024 || window.innerHeight <= 550;
     if (isMobileOrTablet) {
       side.classList.add('collapsed');
@@ -394,10 +394,10 @@ export function setupModals() {
       toggleBtn.textContent = isCollapsed ? '◀' : '▶';
     };
 
-    // Вставляем кнопку сразу после панели #side
     side.parentNode.insertBefore(toggleBtn, side.nextSibling);
   }
 
+  // 2. Модальное окно «Досье»
   const btnDossier = document.getElementById('btn-dossier');
   const modalDossier = document.getElementById('dossier-modal');
   const btnCloseDossier = document.getElementById('btn-close-dossier');
@@ -420,6 +420,7 @@ export function setupModals() {
     });
   }
 
+  // 3. Модальное окно «Все задачи»
   const btnTasks = document.getElementById('btn-tasks');
   const modalTasks = document.getElementById('tasks-modal');
   const btnCloseTasks = document.getElementById('btn-close-tasks');
@@ -442,6 +443,7 @@ export function setupModals() {
     });
   }
 
+  // 4. Закрытие окон по клавише Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (modalDossier && modalDossier.style.display === 'flex') {
@@ -452,6 +454,30 @@ export function setupModals() {
         closeModalAnimated(modalTasks);
         if (state.paused) state.paused = false;
       }
+    }
+  });
+
+  // 5. Автоматический сброс скролла в самый верх при открытии любой новой карточки
+  const modalIds = ['meeting-modal', 'task-modal', 'task-result-modal', 'dossier-modal', 'tasks-modal'];
+  const scrollObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      const target = m.target;
+      const isVisible = target.classList.contains('open') || target.style.display === 'flex';
+      if (isVisible) {
+        const card = target.querySelector('.meeting-card, #task-modal-card, #task-result-card');
+        if (card) {
+          requestAnimationFrame(() => {
+            card.scrollTop = 0;
+          });
+        }
+      }
+    }
+  });
+
+  modalIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      scrollObserver.observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
     }
   });
 }

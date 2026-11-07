@@ -464,13 +464,18 @@ button:active::after {
 
 /* ========== ГЛАВНОЕ МЕНЮ ========== */
 #main-menu {
-  align-items: center; justify-content: center;
+  align-items: center;
+  justify-content: flex-start; /* Не уводит верх за пределы экрана */
   padding: 20px;
+  overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .main-menu-inner {
   max-width: 520px; width: 100%;
+  margin: auto 0; /* Центрирует по вертикали, если места хватает, и сохраняет скролл с самого верха */
   display: flex; flex-direction: column; align-items: stretch;
-  gap: 12px; text-align: center;
+  gap: 10px; text-align: center;
 }
 .game-logo {
   font-size: clamp(32px, 6vw, 56px);
@@ -761,7 +766,78 @@ button:active::after {
   #side-toggle.collapsed {
     right: 0;
   }
-
+  #main-menu {
+    padding: 8px 16px;
+  }
+  .main-menu-inner {
+    gap: 6px;
+    max-width: 480px;
+  }
+  .game-logo {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+  .game-subtitle {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  .menu-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+    min-height: 36px;
+    gap: 10px;
+  }
+  .menu-btn .icon {
+    font-size: 18px;
+  }
+  .menu-btn .hint {
+    font-size: 10px;
+    margin-top: 1px;
+  }
+  .menu-footer {
+    margin-top: 6px;
+    font-size: 10px;
+  }
+    #meeting-modal, #task-modal, #task-result-modal,
+  #dossier-modal, #tasks-modal {
+    padding: 6px;
+  }
+  .meeting-card, #task-modal-card, #task-result-card, .settings-inner {
+    padding: 10px 14px;
+    max-width: 94vw;
+    max-height: 92vh;
+    font-size: 13px;
+  }
+  .meeting-card h2, #task-modal-card h2, #task-result-card h2 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .meeting-card .date {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  .meeting-card .context {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .option {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .option .label {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .option .effect {
+    font-size: 11px;
+  }
+  .dossier {
+    margin-top: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
   /* Компактная нижняя панель слева */
   #bottom {
     padding: 4px 6px;
