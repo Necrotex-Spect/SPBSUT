@@ -1,9 +1,9 @@
 {
-  "mine":     {"name": "Шахта",          "cost": {"metal": 20},               "in": {},                      "out": {},           "icon": "⛏", "extractor": true},
-  "farm":     {"name": "Совхоз",         "cost": {"metal": 15},               "in": {},                      "out": {},           "icon": "🌾", "extractor": true},
-  "oil":      {"name": "Нефтевышка",     "cost": {"metal": 20},               "in": {},                      "out": {},           "icon": "🛢", "extractor": true},
-  "forest":   {"name": "Лесозаготовка",  "cost": {"metal": 15},               "in": {},                      "out": {},           "icon": "🌲", "extractor": true},
-  "factory":  {"name": "Завод",          "cost": {"metal": 30, "coal": 10},   "in": {"coal": 5, "metal": 3}, "out": {"goods": 5}, "icon": "🏭"},
-  "nii":      {"name": "НИИ",            "cost": {"metal": 25, "science": 10}, "in": {},                      "out": {"science": 2},"icon": "🔬"},
-  "port":     {"name": "Порт",           "cost": {"metal": 25},               "in": {},                      "out": {"goods": 2}, "icon": "⚓"}
+  "mine":     {"name": "Шахта",          "cost": {"metal": 25},               "in": {},                      "out": {},           "icon": "⛏", "extractor": true},
+  "farm":     {"name": "Совхоз",         "cost": {"metal": 20, "grain": 5},    "in": {},                      "out": {},           "icon": "🌾", "extractor": true},
+  "oil":      {"name": "Нефтевышка",     "cost": {"metal": 25},               "in": {},                      "out": {},           "icon": "🛢", "extractor": true},
+  "forest":   {"name": "Лесозаготовка",  "cost": {"metal": 20},               "in": {},                      "out": {},           "icon": "🌲", "extractor": true},
+  "factory":  {"name": "Завод",          "cost": {"metal": 35, "coal": 15},   "in": {"coal": 5, "metal": 3}, "out": {"goods": 5}, "icon": "🏭"},
+  "nii":      {"name": "НИИ",            "cost": {"metal": 30, "science": 15}, "in": {},                      "out": {"science": 2},"icon": "🔬"},
+  "port":     {"name": "Порт",           "cost": {"metal": 30},               "in": {},                      "out": {"goods": 2}, "icon": "⚓"}
 }

@@ -6,7 +6,7 @@ export const state = {
     coal: 50, metal: 40, grain: 60, oil: 20,
     science: 0, wood: 30, goods: 0
   },
-  scales: { trust: 60, efficiency: 50, tech: 1, tension: 20 },
+  scales: { efficiency: 50, tech: 1, tension: 20 },
   deltas: { coal: 0, metal: 0, grain: 0, oil: 0, science: 0, wood: 0, goods: 0 },
   regions: [],
   buildings: {},
@@ -17,6 +17,7 @@ export const state = {
   delayedEffects: [],
   MONTH_DURATION: 10,
   timeAccumulator: 0,
+  famineEventTriggered: false
 };
 
 export async function loadData() {

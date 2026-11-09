@@ -30,8 +30,9 @@ function chooseOption(meeting, optId) {
   if (!opt) return;
 
   for (const [k, v] of Object.entries(opt.immediate || {})) {
+    if (k === 'trust') continue;
     if (k in state.resources) state.resources[k] += v;
-    else if (k in state.scales) state.scales[k] += v;
+    else if (k in state.scales) state.scales[k] = Math.max(0, Math.min(100, state.scales[k] + v));
   }
 
   state.dossier.push({
@@ -102,8 +103,9 @@ function applyChoice(choice, event) {
 
   if (choice.immediate) {
     for (const [k, v] of Object.entries(choice.immediate)) {
+      if (k === 'trust') continue;
       if (k in state.resources) state.resources[k] += v;
-      else if (k in state.scales) state.scales[k] += v;
+      else if (k in state.scales) state.scales[k] = Math.max(0, Math.min(100, state.scales[k] + v));
     }
   }
 

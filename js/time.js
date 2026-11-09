@@ -38,11 +38,14 @@ function loop(now) {
 
 export function triggerFamineEvent() {
   if (!eventData || gameEnded) return;
+  if (state.famineEventTriggered) return;
+  
   const famineEvent = eventData.randomEvents.find(e => e.id === 'famine_crisis');
   const modalOpen = document.getElementById('meeting-modal').classList.contains('open');
   
   if (famineEvent && !modalOpen) {
     showRandomEvent(famineEvent);
+    state.famineEventTriggered = true;
   }
 }
 
@@ -60,12 +63,7 @@ function advanceMonth() {
   state.tick++;
 
   // Проверка на проигрыш (Game Over)
-  if (state.scales.trust <= 0) {
-    gameEnded = true;
-    state.paused = true;
-    showGameOver();
-    return;
-  }
+  // Доверие больше не влияет на окончание игры
 
   // Отложенные эффекты
   if (state.delayedEffects && state.delayedEffects.length) {
@@ -76,6 +74,8 @@ function advanceMonth() {
         if (k in state.resources) state.resources[k] += v;
         else if (k in state.scales) state.scales[k] += v;
       }
+      // Apply gameplay effects based on event type
+      applyEventGameplayEffect(e);
       addFeed(`📋 Последствия «${e.eventTitle}»: ${e.consequence}`);
     });
   }
@@ -90,8 +90,8 @@ function advanceMonth() {
     showRandomEvent(ev);
   }
 
-  // Триггер голода
-  if (state.scales.trust < 40 && state.resources.grain < 5) {
+  // Триггер голода (только если мало зерна, доверяние не влияет)
+  if (state.resources.grain < 5) {
     triggerFamineEvent();
   }
 

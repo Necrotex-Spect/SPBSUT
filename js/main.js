@@ -128,9 +128,8 @@ function startActualGame() {
     const settings = loadSettings();
     import('./time.js').then(({ setSpeed }) => setSpeed(settings.defaultSpeed || 1)).catch(() => {});
 
-    setTimeout(() => {
-      if (taskData) initStartingTasks(taskData);
-    }, 300);
+    // Initialize starting tasks immediately at game start, not after delay
+    if (taskData) initStartingTasks(taskData);
 
     console.log('▶ Игра запущена');
   } catch (e) {

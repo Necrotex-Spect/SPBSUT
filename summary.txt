@@ -1,0 +1,22 @@
+## Changes Complete
+
+The startup screen (onboarding) has been redesigned so that players immediately understand the game rules before starting. The key changes:
+
+1. **Added new slide 3 "Главные механики"** with structured blocks explaining:
+   - Resources (region specializations and types)
+   - Population trust (stability indicator)
+   - Trading (resource exchange mechanics)
+   - Construction (building placement rules)
+   - Historical tasks (goals, deadlines, rewards)
+
+2. **Each metric is clearly explained** with icons, color coding, and concise text:
+   - 📦 Resources: Ural→metal, Povolzhye→grain, Donbass→coal, North→oil
+   - ❤ Trust: increases from tasks/building, decreases from failures
+   - 💱 Trading: surplus→deficit exchange system
+   - 🏗 Construction: correct region matching required
+   - 📋 Historical tasks: 1946-1949 challenges with deadlines
+
+3. **Visual design** uses cards with background shading, icons, and consistent color scheme - easily readable without hindering the start button flow
+
+4. **Start button preserved** - onboarding flows to main menu with "Новая игра" button, maintaining the existing game initialization flow
+

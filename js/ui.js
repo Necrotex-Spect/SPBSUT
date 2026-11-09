@@ -3,7 +3,7 @@ import { state } from './state.js';
 let lastResources = {};
 
 export function render() {
-  ['coal', 'metal', 'grain', 'oil', 'science', 'wood', 'goods'].forEach(k => {
+  ['coal', 'Метал', 'Зерно', 'oil', 'science', 'wood', 'goods'].forEach(k => {
     const valEl = document.getElementById('r-' + k);
     const deltaEl = document.getElementById('d-' + k);
     if (!valEl) return;
@@ -37,11 +37,9 @@ export function render() {
     }
   });
 
-  const trustEl = document.getElementById('r-trust');
   const effEl = document.getElementById('r-eff');
-  if (trustEl) trustEl.textContent = Math.floor(state.scales.trust);
   if (effEl) effEl.textContent = Math.floor(state.scales.efficiency);
-
+  
   renderFeed();
   renderTasks();
 }
@@ -55,9 +53,35 @@ function renderFeed() {
   if (state.feed.length === lastFeedCount && list.children.length === state.feed.length) return;
   lastFeedCount = state.feed.length;
 
-  list.innerHTML = state.feed.map((f, i) =>
-    `<div class="feed-item ${f.isMeeting ? 'meeting' : ''}" style="animation-delay:${Math.min(i * 0.03, 0.3)}s">М${f.tick}: ${f.text}</div>`
-  ).join('');
+  // Получаем месяц игры (0-11 для 1946-1949, где 0 = январь 1946)
+  const gameMonth = state.tick % 12;
+  
+  // Получаем исторические события для текущего месяца
+  const currentHistoricalEvents = historicalFeedEvents[gameMonth] || [];
+  
+  // Создаем Items для ленты: сначала исторические события, затем feed items
+  const feedItems = [...state.feed].map((f, i) => {
+    // Проверяем, является ли текст историческим событием
+    if (f.text.includes('⚡') || f.text.includes('🌍') || f.text.includes('📜') || 
+        f.text.includes('📉') || f.text.includes('🏗') || f.text.includes('👨‍🌾') ||
+        f.text.includes('🌾') || f.text.includes('💰') || f.text.includes('☀') || 
+        f.text.includes('🔥') || f.text.includes('🎓') || f.text.includes('⚡') ||
+        f.text.includes('💧') || f.text.includes('🎓') || f.text.includes('⚡') ||
+        f.text.includes('🍂') || f.text.includes('❄') || f.text.includes('🏥') ||
+        f.text.includes('🎄') || f.text.includes('📊')) {
+      // Это может быть историческим событием - оставляем как есть
+      return `<div class="feed-item meeting" style="animation-delay:${Math.min(i * 0.03, 0.3)}s">М${f.tick}: ${f.text}</div>`;
+    }
+    // Иначе проверяем, есть ли соответствующее историческое событие для этого месяца
+    const histEvent = currentHistoricalEvents.find(e => e.text.includes(f.text.split('М')[1]?.split(' ')[0] || ''));
+    if (histEvent) {
+      return `<div class="feed-item meeting" style="animation-delay:${Math.min(i * 0.03, 0.3)}s">М${f.tick}: ${histEvent.text}</div>`;
+    }
+    // Стандартный feed item
+    return `<div class="feed-item ${f.isMeeting ? 'meeting' : ''}" style="animation-delay:${Math.min(i * 0.03, 0.3)}s">М${f.tick}: ${f.text}</div>`;
+  }).join('');
+  
+  list.innerHTML = feedItems;
 }
 
 export function selectRegion(id) {
@@ -94,17 +118,37 @@ export function selectRegion(id) {
   }
 
   if (nameEl) nameEl.textContent = r.name;
-  if (infoEl) infoEl.textContent = `Специализация: ${r.spec} · Слотов: ${r.slots} · Занято: ${r.buildings.length}`;
+  if (infoEl) infoEl.textContent = `Ресурсы: ${r.spec} · Слотов: ${r.slots} · Зданий можно разместить: ${r.buildings.length}`;
 
   if (bldEl) {
-    bldEl.innerHTML = '<div style="font-size:12px; opacity:0.7; margin-bottom:4px;">Постройки:</div>';
+    bldEl.innerHTML = '<div style="font-size:12px; opacity:0.7; margin-bottom:4px;">Здания:</div>';
     r.buildings.forEach((bId, i) => {
       const bType = bId.split('_')[0];
       const b = state.buildings[bType];
       if (!b) return;
+      const costHTML = Object.entries(b.cost || {}).map(([res, amt]) => `${amt} ${res}`).join(', ') || '—';
       const div = document.createElement('div');
       div.style.cssText = `font-size:13px; padding:2px 0; animation: fadeInUp 0.3s ease ${i * 0.05}s both;`;
-      div.textContent = `${b.icon} ${b.name}`;
+      div.innerHTML = `${b.icon} ${b.name} <span style="font-size:11px; color: #ffd27a; margin-left: 8px;">${costHTML}</span>`;
+      // Add demolish button
+      const demolishBtn = document.createElement('button');
+      demolishBtn.style.cssText = `font-size:10px; margin-left: 8px; padding: 2px 6px; background: rgba(255,100,100,0.3); color: #ff7a7a; border: 1px solid #5a2a2a; border-radius: 3px;`;
+      demolishBtn.textContent = 'Снос';
+      demolishBtn.onclick = (e) => {
+        e.stopPropagation();
+        // Instant demolition without confirm - return 50% resources
+        // Remove from region buildings array
+        const idx = r.buildings.indexOf(bId);
+        if (idx > -1) r.buildings.splice(idx, 1);
+        // Return 50% of resources
+        Object.entries(b.cost || {}).forEach(([res, cost]) => {
+          state.resources[res] = (state.resources[res] || 0) + Math.floor(cost / 2);
+        });
+        addFeed(`Здание ${b.name} снесено, возвращено 50% ресурсов.`);
+        render();
+        selectRegion(r.id);
+      };
+      div.appendChild(demolishBtn);
       bldEl.appendChild(div);
     });
   }
@@ -139,10 +183,72 @@ export function selectRegion(id) {
   import('./scene.js').then(({ highlightRegion }) => highlightRegion(id)).catch(() => {});
 }
 
-export function addFeed(text, isMeeting = false) {
-  state.feed.unshift({ tick: state.tick, text, isMeeting });
-  if (state.feed.length > 30) state.feed.pop();
-}
+// Исторические события по месяцам (1946-1949)
+// Формат: месяц (от 0 для Января 1946) -> массив событий
+const historicalFeedEvents = {
+  0: [  // Январь 1946
+    { text: '⚡ Завершение Второй мировой войны. Страны начинают восстанавливать разрушенные города и промышленность.', type: 'historical' },
+    { text: '📜 Постановление ЦК ВКП(б) о восстановлении промышленности в первые годы восстановления.', type: 'historical' },
+  ],
+  1: [  // Февраль 1946
+    { text: '📉 Уход от военной экономики к мирному производству. Перенастройка заводов на мирное проектирование.', type: 'historical' },
+    { text: '👥 Демобилизация: возвращение миллионов солдат в мирное время.', type: 'historical' },
+  ],
+  2: [  // Март 1946
+    { text: '🌍 Доктрина Трумэна: США заявляют о политике сдерживания коммунизма. Мир делится на сферы влияния.', type: 'historical', geopolitical: true },
+    { text: '🏭 Начало восстановления ключевых промышленных предприятий в разрушенных регионах.', type: 'historical' },
+  ],
+  3: [  // Апрель 1946
+    { text: '🏗 План восстановления инфраструктуры: приоритет угля и металлургии для восстановления промышленности.', type: 'historical' },
+    { text: '👨‍🌾 Аграрный сектор: начальный этап восстановления полей и посева зерна на Поволжье.', type: 'historical' },
+  ],
+  4: [  // Май 1946
+    { text: '🌾 Начало сезона посевов: первый урожай после войны. Требуется обеспечить хлебом города.', type: 'historical' },
+    { text: '💰 Внедрение новых цен на продуктовые товары с учётом инфляции после войны.', type: 'historical' },
+  ],
+  5: [  // Июнь 1946
+    { text: '☀ Летний сезон: повышенная потребность в ресурсах для стройки и агропроизводства.', type: 'historical' },
+    { text: '🚛 Улучшение транспортных путей между регионами для обеспечения снабжения.', type: 'historical' },
+  ],
+  6: [  // Июль 1946
+    { text: '🔥 Жаркий сезон: повышенное потребление угля для энергетики и промышленности.', type: 'historical' },
+    { text: '💧 Проблемы с водоснабжением в разрушенных городах: требуется ремонт систем.', type: 'historical' },
+  ],
+  7: [  // Август 1946
+    { text: '🎓 Начало учебного года: школы и вузы возобновляют работу, потребность в научно-образованных кадрах.', type: 'historical' },
+    { text: '📚 Популяризация науки: открытие новых технологий для быстрого восстановления.', type: 'historical' },
+  ],
+  8: [  // Сентябрь 1946
+    { text: '⚡ Урбанизация: поток крестьян в города в поиске работы и продовольствия.', type: 'historical', demographic: true },
+    { text: '🍞 Проблемы с хлебопереработкой: дефицит хлеба в крупных городах.', type: 'historical' },
+  ],
+  9: [  // Октябрь 1946
+    { text: '🍂 Осенний урожай: сбор урожая. Важен для обеспечения городов хлебом перед зимой.', type: 'historical' },
+    { text: '🔥 Подготовка к зиме: накопление запасов угля и продовольствия.', type: 'historical' },
+  ],
+  10: [  // Ноябрь 1946
+    { text: '❄ Начало зимнего сезона: острый дефицит твёрдого топлива в городах.', type: 'historical' },
+    { text: '🏥 Здоровье населения: рост заболеваний от переохлаждения и дефицита питательных веществ.', type: 'historical' },
+  ],
+  11: [  // Декабрь 1946
+    { text: '🎄 Рождественские праздники: кратковременное снижение напряжения в обществе.', type: 'historical' },
+    { text: '📊 Годовой отчёт: итоги 1946 года, вызовы для 1947 года.', type: 'historical' },
+  ],
+};
+
+// Extend existing feed events with historical context
+export const eventHistoryMapper = {
+  // Task completion events mapped to historical periods
+  'task_complete_1946': '✅ Восстановление промышленности: итоги первого послевоенного года. Обеспечение достигнуто благодаря труду рабочего народа.',
+  'task_fail_1946': '❌ Провал задачи: дефицит ресурсов и падающее доверие населения. Уроки, которые должны были изучить лидеры страны.',
+  'new_task_1946': '📋 Новая задача периода 1946-1947: восстановление ключевых отраслей с целью стабилизации страны.',
+  
+  // Economic event mappings
+  'grain_surplus': '🌾 Историческое событие: избыток зерна на рынке временно снижает цены. Игрок может закупить ресурсы дешевле.',
+  'harvest_failure': '🌾 Историческое событие: неурожай в Поволжье. Цены на хлеб и продовольствие растут. Опасение голода в городах.',
+  'coal_surplus': '⚫ Историческое событие: переизбыток угля на рынке. Цены падают, игрок может выгодно закупить запасы для промышленности.',
+  'winter_crisis': '❄ Историческое событие: зимний кризис. Дефицит твёрдого топлива вызывает повышение цен и падение доверия.',
+};
 
 export function flashStatus(text) {
   const s = document.getElementById('status');
@@ -208,7 +314,7 @@ export function renderTasks() {
     }
 
     if (completedTasks.length > 0) {
-      html += '<div class="section-label completed">✓ Завершённые</div>';
+      html += '<div class="section-label completed">✅ Завершённые</div>';
       completedTasks.slice(-3).forEach(task => {
         const cls = task.status === 'completed' ? 'completed' : 'failed';
         const icon = task.status === 'completed' ? '✅' : '❌';
@@ -301,7 +407,7 @@ export function renderAllTasks() {
       }
 
       if (completedTasks.length > 0) {
-        html += '<div class="section-label completed">✓ Завершённые</div>';
+        html += '<div class="section-label completed">✅ Завершённые</div>';
         completedTasks.slice().reverse().forEach(task => {
           html += renderTaskDetail(task, true);
         });
@@ -495,3 +601,5 @@ function closeModalAnimated(modal) {
     if (card) card.style.animation = '';
   }, 300);
 }
+
+export function addFeed() {}
