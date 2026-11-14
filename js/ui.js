@@ -65,15 +65,15 @@ export function selectRegion(id) {
   const r = state.regions.find(x => x.id === id);
   if (!r) return;
 
+  // 1. Разворачиваем штаб, если он был свёрнут
   const side = document.getElementById('side');
-  if (side && window.innerWidth < 900) {
-    side.classList.add('expanded');
-    setTimeout(() => {
-      const regionPanel = document.getElementById('region-panel');
-      if (regionPanel) {
-        regionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 350);
+  const toggleBtn = document.getElementById('side-toggle');
+  if (side && side.classList.contains('collapsed')) {
+    side.classList.remove('collapsed');
+    if (toggleBtn) {
+      toggleBtn.classList.remove('collapsed');
+      toggleBtn.textContent = '▶';
+    }
   }
 
   const nameEl = document.getElementById('rp-name');
@@ -86,6 +86,11 @@ export function selectRegion(id) {
     panel.style.animation = 'none';
     void panel.offsetWidth;
     panel.style.animation = 'fadeInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both';
+    
+    // 2. Плавно прокручиваем штаб прямо к характеристикам выбранного города
+    setTimeout(() => {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
   }
 
   if (nameEl) nameEl.textContent = r.name;
@@ -368,40 +373,29 @@ export function formatEffects(effects) {
 export function setupModals() {
   const side = document.getElementById('side');
 
-  if (side) {
-    side.addEventListener('click', (e) => {
-      if (window.innerWidth >= 900) return;
-      const rect = side.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      if (y < 30) {
-        side.classList.toggle('expanded');
-      }
-    });
+  if (side && !document.getElementById('side-toggle')) {
+    // Создаём кнопку-язычок для сворачивания/разворачивания боковой панели
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'side-toggle';
+    toggleBtn.title = 'Свернуть / Развернуть Штаб';
+    toggleBtn.textContent = '▶';
 
-    let startY = 0;
-    side.addEventListener('touchstart', (e) => {
-      if (window.innerWidth >= 900) return;
-      const rect = side.getBoundingClientRect();
-      const y = e.touches[0].clientY - rect.top;
-      if (y < 30) {
-        startY = e.touches[0].clientY;
-      }
-    }, { passive: true });
+    // На мобильных экранах по умолчанию сворачиваем панель, чтобы открыть Дальний Восток
+    const isMobileOrTablet = window.innerWidth <= 1024 || window.innerHeight <= 550;
+    if (isMobileOrTablet) {
+      side.classList.add('collapsed');
+      toggleBtn.classList.add('collapsed');
+      toggleBtn.textContent = '◀';
+    }
 
-    side.addEventListener('touchend', (e) => {
-      if (window.innerWidth >= 900) return;
-      if (!startY) return;
-      const endY = e.changedTouches[0].clientY;
-      const diff = endY - startY;
-      if (Math.abs(diff) > 30) {
-        if (diff > 0) {
-          side.classList.remove('expanded');
-        } else {
-          side.classList.add('expanded');
-        }
-      }
-      startY = 0;
-    }, { passive: true });
+    toggleBtn.onclick = () => {
+      const isCollapsed = side.classList.toggle('collapsed');
+      toggleBtn.classList.toggle('collapsed', isCollapsed);
+      toggleBtn.textContent = isCollapsed ? '◀' : '▶';
+    };
+
+    // Вставляем кнопку сразу после панели #side
+    side.parentNode.insertBefore(toggleBtn, side.nextSibling);
   }
 
   const btnDossier = document.getElementById('btn-dossier');
@@ -414,7 +408,6 @@ export function setupModals() {
   if (btnCloseDossier) {
     btnCloseDossier.onclick = () => {
       closeModalAnimated(modalDossier);
-      // Снимаем паузу
       if (state.paused) state.paused = false;
     };
   }
@@ -422,7 +415,6 @@ export function setupModals() {
     modalDossier.addEventListener('click', (e) => {
       if (e.target === modalDossier) {
         closeModalAnimated(modalDossier);
-        // Снимаем паузу
         if (state.paused) state.paused = false;
       }
     });
@@ -438,7 +430,6 @@ export function setupModals() {
   if (btnCloseTasks) {
     btnCloseTasks.onclick = () => {
       closeModalAnimated(modalTasks);
-      // Снимаем паузу
       if (state.paused) state.paused = false;
     };
   }
@@ -446,7 +437,6 @@ export function setupModals() {
     modalTasks.addEventListener('click', (e) => {
       if (e.target === modalTasks) {
         closeModalAnimated(modalTasks);
-        // Снимаем паузу
         if (state.paused) state.paused = false;
       }
     });
